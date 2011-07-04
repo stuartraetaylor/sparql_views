@@ -143,7 +143,7 @@ function sparql_views_resource_type_create($name, $values = array()) {
 function sparql_views_resource_type_load($name = NULL) {
   // Replace dashes with underscores so this can be used as menu argument
   // loader too.
-  $types = entity_load('sparql_views_resource_type', isset($name) ? array(strtr($name, array('-' => '_'))) : FALSE);
+  $types = entity_load_multiple_by_name('sparql_views_resource_type', isset($name) ? array(strtr($name, array('-' => '_'))) : FALSE);
   if (isset($name)) {
     return isset($types[$name]) ? $types[$name] : FALSE;
   }
@@ -266,17 +266,17 @@ function sparql_views_resource_create($name, $values = array(), $account = NULL)
  *   A resource object.
  */
 function sparql_views_resource_load($svid) {
-  $result = entity_load('sparql_views_resource', array($svid));
+  $result = entity_load_multiple_by_name('sparql_views_resource', array($svid));
   return $result ? reset($result) : FALSE;
 }
 
 /**
  * Loads multiple resources.
  *
- * @see entity_load().
+ * @see entity_load_multiple_by_name().
  */
 function sparql_views_resource_load_multiple($svids, $conditions = array()) {
-  return entity_load('sparql_views_resource', $svids, $conditions);
+  return entity_load_multiple_by_name('sparql_views_resource', $svids, $conditions);
 }
 
 /**

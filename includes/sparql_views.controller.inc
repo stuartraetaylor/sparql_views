@@ -10,7 +10,7 @@
  * A controller implementing EntityAPIControllerInterface for the database 
  * which can deal with exportable SPARQL Views resources.
  */
-class SparqlViewsController extends EntityAPIController implements EntityAPIControllerInterface {
+class SparqlViewsController extends EntityAPIControllerExportable implements EntityAPIControllerInterface {
 
   /**
    * Implements EntityAPIControllerInterface.
