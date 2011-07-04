@@ -91,8 +91,9 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     $prefixes = '';
     $mynamespaces = array();
 
-    // Create SELECT statement.
+    // Create the SELECT clause.
     $select = 'SELECT';
+    // Add fields that the user has added to the Fields section in Views UI.
     foreach ($this->select_fields as $key => $field) {
       // Do not add variable to SELECT if it will be replaced with a value.
       if (!isset($this->replacements[$field])) {
@@ -100,6 +101,8 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
         $select .= " ?$field";
       }
     }
+
+    // Create the WHERE clause.
     $where = '';
 
     // Form the triple pattern.
