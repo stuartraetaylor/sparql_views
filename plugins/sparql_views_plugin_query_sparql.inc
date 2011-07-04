@@ -61,16 +61,43 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
       'default' => FALSE,
       'bool' => TRUE,
     );
+    $options['distinct'] = array(
+      'default' => TRUE,
+      'bool' => TRUE,
+    );
 
     return $options;
   }
   
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+    // Some form elements belong in a fieldset for presentation, but can't
+    // be moved into one because of the form_state['values'] hierarchy. Those
+    // elements can add a #fieldset => 'fieldset_name' property, and they'll
+    // be moved to their fieldset during pre_render.
+    // @todo Remove this when issue #1208824 is resolved.
+    $form['#pre_render'][] = 'views_ui_pre_render_add_fieldset_markup';
+
     $form['consolidate'] = array(
       '#type' => 'checkbox',
       '#title' => t('Consolidate Results'),
       '#description' => t('This will combine all the properties for a given subject into one result. This will override any field-level consolidation.'),
       '#default_value' => !empty($this->options['consolidate']),
+    );
+
+    $form['advanced_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Advanced settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+
+    $form['distinct'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use DISTINCT query'),
+      '#description' => t("This eliminates duplicate rows by using !distinct. This can negatively effect the performance of the query, so you may want to turn off this option if you know that your dataset does not return duplicates for this query.", array('!distinct' => l('DISTINCT', 'http://www.w3.org/TR/rdf-sparql-query/#modDistinct'))),
+      '#default_value' => !empty($this->options['distinct']),
+      '#fieldset' => 'advanced_settings',
     );
   }
 
@@ -93,6 +120,12 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
 
     // Create the SELECT clause.
     $select = 'SELECT';
+
+    // Add DISTINCT if selected in Query Settings.
+    if ($this->options['distinct'] == TRUE) {
+      $select .= ' DISTINCT';
+    }
+
     // Add fields that the user has added to the Fields section in Views UI.
     foreach ($this->select_fields as $key => $field) {
       // Do not add variable to SELECT if it will be replaced with a value.
