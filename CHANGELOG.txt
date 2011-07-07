@@ -5,8 +5,8 @@ require action by the user.
 For a full list of changes, refer to the commit log at
 http://drupal.org/node/817148/commits
 
-SPARQL Views 7.x-2.x-dev
-------------------------
+SPARQL Views 7.x-2.x-alpha4
+---------------------------
 - #1206420: Added DISTINCT option, turned on by default.
 
 SPARQL Views 7.x-2.x
