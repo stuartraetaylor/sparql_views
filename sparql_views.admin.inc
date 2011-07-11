@@ -98,15 +98,6 @@ function sparql_views_resource_type_form_submit(&$form, &$form_state) {
   $resource_type = entity_ui_form_submit_build_entity($form, $form_state);
   // Save and go back.
   $resource_type->save();
-  $svid = $resource_type->id;
-  $delete = db_delete('sparql_views_resource_type_endpoint')->condition('svid', $svid)->execute();
-  $insert = db_insert('sparql_views_resource_type_endpoint')->fields(array('svid', 'srid'));
-  foreach ($resource_type->endpoints as $srid => $selected) {
-    if ($selected) {
-      $insert->values(array('svid' => $svid, 'srid' => $srid));
-    }
-  }
-  $insert->execute();
   $form_state['redirect'] = 'admin/structure/sparql-views';
 }
 
