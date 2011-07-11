@@ -95,6 +95,77 @@ function sparql_views_entity_info() {
 }
 
 /**
+ * @defgroup sparql_views_api SPARQL Views API
+ * @{
+ * SPARQL Views can be defined in code using modules. This means any dataset
+ * can have endpoints, SPARQL Views resource types, and default Views defined
+ * in a module. These defaults will be automatically installed upon module
+ * installation, but can be changed through the user interface by the site
+ * administrator.
+ *
+ * Modules must define their SPARQL Views types in their .install file.
+ * Defining SPARQL Views consists of the following steps:
+ * In .install
+ *   1. Register the endpoints used with sparql_views_register_endpoints.
+ *   2. Define the SPARQL Views resource types, setting the endpoints where this
+ *      resource is available, and save with sparql_views_resource_type_save.
+ *   3. Add field definitions for fields that will be used.
+ *   4. Add field instances to the SPARQL Views resource types.
+ * In .module
+ *   1. Define namespace mappings using hook_rdf_mapping. Try to use standard
+ *      prefixes for common vocabularies, such as those listed on
+ *      http://prefix.cc.
+ *   2. Define RDF mappings for SPARQL Views types using hook_rdf_mappings.
+ */
+
+/*
+ * Register SPARQL endpoints used by this module and get a list of the
+ * corresponding IDs for the submitted endpoints. If an endpoint is already
+ * registered for a URI, the ID for the pre-existing endpoint will be returned
+ * with no other action taken on that endpoint.
+ *
+ * @param $endpoints
+ *   An array of endpoint objects, keyed by label. If the endpoint is already
+ *   registered, the existing values are maintained.
+ *   
+ *   Required properties:
+ *     $endpoint->title - The human-readable name of the endpoint.
+ *     $endpoint->endpoint - The URI of the endpoint.
+ *   
+ * @return $endpoint_ids
+ *   An array of IDs, keyed by the labels passed by the caller.
+ *   For example:
+ *     array('DBpedia' => 2);
+ */
+function sparql_views_register_endpoints($endpoints = array()) {
+  $endpoint_ids = array();
+
+  foreach ($endpoints as $key => $endpoint) {
+    $endpoint_record = sparql_registry_load_by_uri($endpoint->endpoint);
+
+    if (empty($endpoint_record)) {
+      $endpoint_record = sparql_registry_save($endpoint);
+      $srid = $endpoint_record->srid;
+    }
+    else {
+      // In order to merge the two SPARQL registry objects, we convert to arrays
+      // and then convert the result to an object.
+      $updated_endpoint = (object) array_merge((array) $endpoint, (array) $endpoint_record);
+      sparql_registry_save($updated_endpoint);
+      $srid = $endpoint_record->srid;
+    }
+
+    $endpoint_ids[$key] = $srid;
+  }
+
+  return $endpoint_ids;
+}
+
+/**
+ * @} End of "defgroup sparql_views_api".
+ */
+
+/**
  * A class used for SPARQL Views resource types.
  */
 class SparqlViewsResourceType extends Entity {
