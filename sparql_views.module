@@ -168,7 +168,7 @@ function sparql_views_resource_type_save($resource) {
  * Deletes an existing resource.
  *
  * @param $resource
- *   The resource object to be deleted.
+ *   The name of the resource type to be deleted.
  */
 function sparql_views_resource_type_delete($resource) {
   return entity_delete('sparql_views_resource_type', $resource);
