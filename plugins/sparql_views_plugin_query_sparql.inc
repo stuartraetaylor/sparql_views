@@ -215,7 +215,7 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     $views_result = array();
     $query = $view->build_info['query'];
     $views_data = sparql_views_views_data();
-    $endpoint_uri = $views_data[$this->base_table]['table']['endpoint']->endpoint;
+    $endpoint_uri = $views_data[$this->base_table]['table']['endpoint']->uri;
     $endpoint = sparql_registry_load_by_uri($endpoint_uri);
     $start = microtime(TRUE);
 

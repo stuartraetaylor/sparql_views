@@ -199,7 +199,7 @@ function sparql_views_get_endpoints() {
   foreach ($endpoints as $key => $endpoint) {
     // We create a hash of the endpoint URI so that we can have a short base
     // table name while still ensuring exportability of Views between sites.
-    $hash = crc32(str_replace('http://', '', $endpoint->endpoint));
+    $hash = crc32(str_replace('http://', '', $endpoint->uri));
     $endpoints[$key]->table_id = 'sparql_views_' . $hash;
   }
   return $endpoints;
