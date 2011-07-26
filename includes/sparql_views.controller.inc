@@ -24,16 +24,18 @@ class SparqlViewsController extends EntityAPIControllerExportable implements Ent
     $entity_record = parent::save($entity, $transaction);
 
     // Add the endpoints that this resource works with.
-    $entity_id = db_query("SELECT id FROM {sparql_views_resource_type} WHERE name = :name", array(':name' => $entity->name))->fetch();
-    $svid = $entity_id->id;
-    $delete = db_delete('sparql_views_resource_type_endpoint')->condition('svid', $svid)->execute();
-    $insert = db_insert('sparql_views_resource_type_endpoint')->fields(array('svid', 'srid'));
-    foreach ($entity->endpoints as $srid => $selected) {
-      if ($selected) {
-        $insert->values(array('svid' => $svid, 'srid' => $srid));
+    if (isset($entity->endpoints)) {
+      $entity_id = db_query("SELECT id FROM {sparql_views_resource_type} WHERE name = :name", array(':name' => $entity->name))->fetch();
+      $svid = $entity_id->id;
+      $delete = db_delete('sparql_views_resource_type_endpoint')->condition('svid', $svid)->execute();
+      $insert = db_insert('sparql_views_resource_type_endpoint')->fields(array('svid', 'srid'));
+      foreach ($entity->endpoints as $srid => $selected) {
+        if ($selected) {
+          $insert->values(array('svid' => $svid, 'srid' => $srid));
+        }
       }
+      $insert->execute();
     }
-    $insert->execute();
 
     field_info_cache_clear();
     return $entity_record;
