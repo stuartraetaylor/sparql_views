@@ -1,5 +1,7 @@
 <?php
 
+define('SPARQL_VIEWS_ENTITY', 'sparql_views_resource');
+
 function sparql_views_views_data() {
   $data = array();
 
@@ -32,7 +34,7 @@ function sparql_views_views_data() {
  * resource types are enabled for it.
  */
 function sparql_views_views_data_alter(&$data) {
-  $entity_info = entity_get_info('sparql_views_resource');
+  $entity_info = entity_get_info(SPARQL_VIEWS_ENTITY);
   // Create the data definition for each endpoint.
   foreach (sparql_views_get_endpoints() as $endpoint) {
     $select = db_select('sparql_views_resource_type', 'svrt')
@@ -41,7 +43,7 @@ function sparql_views_views_data_alter(&$data) {
     $bundles = $select->execute()->fetchCol();
     foreach($bundles as $bundle_type) {
       $rdf_mapping = $entity_info['bundles'][$bundle_type]['rdf_mapping'];
-      $group = $bundle_type;  
+      $group = $entity_info['bundles'][$bundle_type]['label'];  
       $new_fields = array();
 
       // Attach handlers for the subject URI.
@@ -107,11 +109,17 @@ function sparql_views_views_data_alter(&$data) {
 
       // Attach handlers for the individual field.
       foreach ($rdf_mapping as $field_name => $field ) {
-        if($field_name == 'rdftype')
+        // If this is the rdftype part of the RDF mapping, skip it.
+        if($field_name == 'rdftype') {
           continue;
+        }
+
         $field_info = field_info_field($field_name);
+        $instance_info = field_info_instance(SPARQL_VIEWS_ENTITY, $field_name, $bundle_type);
+        $field_label = $instance_info['label'];
+
         $new_field = array(
-          'title' => t($field_name),
+          'title' => t($field_label),
           'help' => t('RDF mapping: %rdf-mapping', array('%rdf-mapping' => implode(', ', $field['predicates']))),
           'group' => t($group),
           'field' => array(
@@ -123,21 +131,13 @@ function sparql_views_views_data_alter(&$data) {
             'subject' => $bundle_type,
             'click sortable' => TRUE,
           ),
-          'relationship' => array(
-            'help' => t('The last comment of a node.'),
-            'group' => t($group),
-            'base' => $endpoint->table_id,
-            'base field' => $field_name,
-            'handler' => 'sparql_views_handler_relationship',
-            'label' => t($field_name),
-          ),
           'filter' => array(
             'help' => t('Compare values.'),
             'group' => t($group),
             'base' => $endpoint->table_id,
             'base field' => $field_name,
             'handler' => 'sparql_views_handler_filter_field_value',
-            'label' => t($field_name),
+            'label' => t($field_label),
           ),
           'argument' => array(
             'help' => t('Replace part of the query'),
@@ -145,14 +145,25 @@ function sparql_views_views_data_alter(&$data) {
             'base' => $endpoint->table_id,
             'base field' => $field_name,
             'handler' => 'sparql_views_handler_argument',
-            'label' => t($field_name),
+            'label' => t($field_label),
           ),
           'sort' => array(
             'help' => t('Order the results of the query. This can make your query very slow and will time out on some endpoints, such as DBpedia.'),
             'handler' => 'sparql_views_handler_sort',
           ),
         );
-       
+
+        if ($field_info['type'] == 'sparql_views_related_resource') {
+          $new_field['relationship'] = array(
+            'help' => t('The last comment of a node.'),
+            'group' => t($group),
+            'base' => $endpoint->table_id,
+            'base field' => $field_name,
+            'handler' => 'sparql_views_handler_relationship',
+            'label' => t($field_label),
+          );
+        }
+
         $new_fields[$bundle_type.'_'.$field_name] = $new_field;
         $new_fields[$bundle_type.'_'.$field_name . '_language']['filter'] = array(
           'title' => t($field_name . ' language'),
