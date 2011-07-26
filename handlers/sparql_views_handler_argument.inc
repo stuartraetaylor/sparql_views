@@ -65,8 +65,10 @@ class sparql_views_handler_argument extends views_handler_argument {
 
     $replacement = !empty($return) ? $return : $this->argument;
 
-    $value_type = $this->options['sparql_options']['value_type'];
-    $language = $this->options['sparql_options']['language'];
-    $this->query->add_replacement($this->options['field'], $replacement, $value_type, $language);
+    if (!empty($replacement)) {
+      $value_type = $this->options['sparql_options']['value_type'];
+      $language = $this->options['sparql_options']['language'];
+      $this->query->add_replacement($this->options['field'], $replacement, $value_type, $language);
+    }
   }
 }

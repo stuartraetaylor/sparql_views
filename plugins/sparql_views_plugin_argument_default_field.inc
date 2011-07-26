@@ -24,10 +24,7 @@ class sparql_views_plugin_argument_default_field extends views_plugin_argument_d
         $source_field = $this->options['sparql_options']['source_field'];
         $field = field_get_items('node', $node, $source_field);
         $replacement = $field[0]['value'];
-        $value_type = $this->options['sparql_options']['value_type'];
-        $language = $this->options['sparql_options']['language'];
-        $this->argument->query->add_replacement($this->argument->options['field'], $replacement, $value_type, $language);
-        // We only return because we have to.
+
         return $replacement;
       }
     }
@@ -41,7 +38,6 @@ class sparql_views_plugin_argument_default_field extends views_plugin_argument_d
     $options = parent::option_definition();
     $options['source_field'] = array('default' => '');
     // Attach the SPARQL specific options.
-    $options = _sparql_views_attach_form_options($options, $this->selected_sparql_options);
 
     return $options;
   }
@@ -59,8 +55,6 @@ class sparql_views_plugin_argument_default_field extends views_plugin_argument_d
         $fields[$field_name] = check_plain(t($field_info['label']));
       }
     }
-    // Attach the SPARQL specific form elements.
-    $form = _sparql_views_attach_form_elements($form, $this->options, $this->selected_sparql_options);
     $form['sparql_options']['source_field'] = array(
       '#type' => 'select',
       '#title' => t('Source Field'),
