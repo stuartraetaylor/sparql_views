@@ -141,7 +141,7 @@ function sparql_views_register_endpoints($endpoints = array()) {
   $endpoint_ids = array();
 
   foreach ($endpoints as $key => $endpoint) {
-    $endpoint_record = sparql_registry_load_by_uri($endpoint->endpoint);
+    $endpoint_record = sparql_registry_load_by_uri($endpoint->uri);
 
     if (empty($endpoint_record)) {
       $endpoint_record = sparql_registry_save($endpoint);

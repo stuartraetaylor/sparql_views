@@ -203,15 +203,32 @@ function sparql_views_views_plugins() {
 }
 
 /*
+ * Helper function to get one endpoint with base table hash.
+ */
+function sparql_views_get_endpoint($uri) {
+  $endpoint = sparql_registry_load_by_uri($uri);
+  return _sparql_views_hash($endpoint);
+}
+
+/*
  * Helper function to get base tables with hashes.
  */
 function sparql_views_get_endpoints() {
   $endpoints = sparql_registry_load_multiple();
   foreach ($endpoints as $key => $endpoint) {
-    // We create a hash of the endpoint URI so that we can have a short base
-    // table name while still ensuring exportability of Views between sites.
-    $hash = crc32(str_replace('http://', '', $endpoint->uri));
-    $endpoints[$key]->table_id = 'sparql_views_' . $hash;
+    $endpoints[$key] = _sparql_views_hash($endpoint);
   }
   return $endpoints;
+}
+
+/*
+ * Private helper function to get hashes.
+ */
+function _sparql_views_hash($endpoint) {
+  // We create a hash of the endpoint URI so that we can have a short base
+  // table name while still ensuring exportability of Views between sites.
+  $hash = crc32(str_replace('http://', '', $endpoint->uri));
+  $endpoint->table_id = 'sparql_views_' . $hash;
+
+  return $endpoint;
 }

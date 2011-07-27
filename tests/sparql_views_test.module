@@ -1,36 +1,30 @@
 <?php
 
 /**
- * Implements hook_permission().
- */
-function sparql_views_test_permission() {
-  return array(
-    'sparql_views_test test permission' => array(
-      'title' => t('Test permission'),
-      'description' => t('sparql_views_test test permission'),
-    ),
-  );
-}
-
-/**
  * Implements hook_views_api().
  */
 function sparql_views_test_views_api() {
   return array(
-    'api' => '3.0-alpha1',
+    'api' => '3.0',
   );
 }
 
 /**
- * Implements hook_views_data()
+ * Implements hook_rdf_mapping().
  */
-function sparql_views_test_views_data() {
-  return variable_get('sparql_views_test_views_data', array());
-}
+function sparql_views_test_rdf_mapping() {
+  $return = array(
+    'sparql_views_test_person' =>array(
+      'type' => 'sparql_views_resource',
+      'bundle' => 'sparql_views_test_person',
+      'mapping' => array(
+        'rdftype' => array('foaf:Person'),
+        'sparql_views_test_person_name' => array(
+          'predicates' => array('foaf:name'),
+        ),
+      ),
+    ),
+  );
 
-/**
- * Implements hook_views_plugins()
- */
-function sparql_views_test_views_plugins() {
-  return variable_get('sparql_views_test_views_plugins', array());
+  return $return;
 }

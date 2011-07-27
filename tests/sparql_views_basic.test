@@ -1,5 +1,5 @@
 <?php
-module_load_include('test', 'sparql_views', 'tests/sparql_views_query');
+
 /**
  * Tests basic query functionality.
  *
@@ -7,7 +7,8 @@ module_load_include('test', 'sparql_views', 'tests/sparql_views_query');
  * queries. It does not test whether SPARQL Views resource fields are available
  * and can be used in queries.
  */
-class sparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
+class SparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
+  
   public static function getInfo() {
     return array(
       'name' => 'Tests basic SPARQL Views querying',
@@ -16,8 +17,11 @@ class sparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
     );
   }
 
-  public function setUp() {
-    parent::setUp();
+  protected function setUp() {
+    parent::setUp('sparql_views', 'sparql_registry', 'views', 'views_ui', 'sparql_views_test');
+
+    $web_user = $this->drupalCreateUser(array('administer sparql_views types',));
+    $this->drupalLogin($web_user);
   }
 
   public function testFieldQuery() {
@@ -25,77 +29,12 @@ class sparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
 
     // Execute the view.
     $view->execute();
+
+    // Test that the query pulled something from the endpoint.
     $this->assertEqual(10, count($view->result), t('The number of returned rows match.'));
-  }
-  
-  /**
-   * The views data definition.
-   */
-  protected function viewsData() {
-    $endpoints = sparql_views_get_endpoints();
-    $endpoint_id = $endpoints[1]->table_id;
 
-    // Declaration of the base table.
-    $data[$endpoint_id]['table'] = array(
-      'group' => t('SPARQL Views test'),
-      'base' => array(
-        'field' => 'svid',
-        'title' => t('SPARQL Views test entity uri'),
-        'help' => t('Persons in the dataset.'),
-      ),
-    );
-
-    // Declaration of fields.
-    $data[$endpoint_id]['person'] = array(
-      'title' => t('ID'),
-      'help' => t('The test data ID'),
-      'field' => array(
-        'handler' => 'sparql_views_handler_field_subject',
-      ),
-    );
-    $data[$endpoint_id]['name'] = array(
-      'title' => t('Name'),
-      'help' => t('The name of the person'),
-      'field' => array(
-        'handler' => 'sparql_views_handler_field',
-        'rdf_mapping' => array('foaf:name'),
-        'subject' => 'person',
-      ),
-    );
-    return $data;
+    // Test that the query pulled foaf:name from the endpoint.
+    $this->assertTrue($view->result[0]->{$this->field_1}, t('The query returned values for foaf:name.'));
   }
 
-  /**
-   * Build and return a basic view of the views_test table.
-   */
-  protected function getBasicView() {
-    views_include('view');
-    $endpoints = sparql_views_get_endpoints();
-    $endpoint_id = $endpoints[1]->table_id;
-
-    // Create the basic view.
-    $view = new view();
-    $view->vid = 'test_view';
-    $view->add_display('default');
-    $view->base_table = $endpoint_id;
-
-    // Set up the fields we need.
-    $display = $view->new_display('default', 'Master', 'default');
-    $display->override_option('fields', array(
-      'person' => array(
-        'id' => 'person',
-        'table' => $endpoint_id,
-        'field' => 'person',
-        'relationship' => 'none',
-      ),
-      'name' => array(
-        'id' => 'name',
-        'table' => $endpoint_id,
-        'field' => 'name',
-        'relationship' => 'none',
-      ),
-    ));
-
-    return $view;
-  }
 }

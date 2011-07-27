@@ -55,7 +55,7 @@ function sparql_views_resource_type_form($form, &$form_state, $resource_type, $o
   $endpoints = sparql_registry_load_multiple();
   $options = array();
   foreach ($endpoints as $endpoint) {
-    $options[$endpoint->srid] = $endpoint->title . ': <span class="description">' . $endpoint->endpoint . '</span>';
+    $options[$endpoint->srid] = $endpoint->title . ': <span class="description">' . $endpoint->uri . '</span>';
   }
   $form['endpoints'] = array(
     '#title' => t('Endpoints this resource can be found in'),
