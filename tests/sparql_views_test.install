@@ -1,0 +1,118 @@
+<?php
+
+/**
+ * @file
+ * Install file for SPARQL Views Test module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function sparql_views_test_install() {
+  // Create the SPARQL Views resource type.
+  _sparql_views_test_create_resource_type();
+
+  // Create all the fields we are adding to our resource type.
+  foreach (_sparql_views_test_installed_fields() as $field) {
+    field_create_field($field);
+  }
+
+  // Create all the instances for our fields.
+  foreach (_sparql_views_test_installed_instances() as $bundle_name => $bundle) {
+    foreach ($bundle as $instance) {
+      $instance['bundle'] = $bundle_name;
+      field_create_instance($instance);
+    }
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function sparql_views_test_uninstall() {
+  // Delete the fields.
+  foreach (_sparql_views_test_installed_fields() as $field) {
+    field_delete_field($field['field_name']);
+  }
+
+  // Delete the resource type.
+  sparql_views_resource_type_delete('sparql_views_test_country');
+
+  // Delete the node type.
+  node_type_delete('sparql_views_test_leader');
+}
+
+/**
+ * Save the SPARQL Views resource type.
+ */
+function _sparql_views_test_create_resource_type() {
+  $t = get_t();
+
+  // Create an array of endpoint objects.
+  $endpoints = array();
+  $endpoints['ISWC2010'] = (object) array(
+    'title' => 'ISWC2010',
+    'uri' => 'http://localhost/arc2/ISWC2010/sparql.php',
+  );
+  // Save the endpoints and get an array of endpoint ids.
+  $endpoint_ids = sparql_views_register_endpoints($endpoints);
+
+  // Define the SPARQL Views resource type.
+  $sparql_views_test_person = array(
+    'name' => 'sparql_views_test_person',
+    'label' => $t('Person (SV test)'),
+    'base' => 'sparql_views_resource',
+    'description' => $t('This is a person as modeled in the ISWC2010 dataset.'),
+    // For each endpoint where this resource can be used, select that endpoint.
+    'endpoints' => array(
+      $endpoint_ids['ISWC2010'] => TRUE,
+    ),
+  );
+
+  sparql_views_resource_type_save((object) $sparql_views_test_person);
+}
+
+/**
+ * Return a structured array defining the fields created by this resource type.
+ * Note that field names must be shorter than 32 characters.
+ */
+function _sparql_views_test_installed_fields() {
+  $t = get_t();
+
+  $return = array(
+    array(
+      'field_name' => 'sparql_views_test_person_name',
+      'type'        => 'text',
+    ),
+    array(
+      'field_name' => 'sparql_views_test_person_image',
+      'type'        => 'image',
+    ),
+  );
+
+  return $return;
+}
+
+/**
+ * Return a structured array defining the instances for this content type.
+ */
+function _sparql_views_test_installed_instances() {
+  $t = get_t();
+  $instances = array();
+
+  // Add the fields to the resource type (Country).
+  $instances['sparql_views_test_person'] = array(
+    array(
+      'field_name'  => 'sparql_views_test_person_name',
+      'label'       => $t('Name'),
+      'entity_type' => 'sparql_views_resource',
+    ),
+    array(
+      'field_name'  => 'sparql_views_test_person_image',
+      'label'       => $t('Image'),
+      'entity_type' => 'sparql_views_resource',
+    ),
+  );
+
+  return $instances;
+}
