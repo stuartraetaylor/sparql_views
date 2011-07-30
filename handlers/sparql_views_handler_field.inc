@@ -243,7 +243,7 @@ class sparql_views_handler_field extends views_handler_field {
   function render_field_formatter($values, $formatter) {
     $field_name = $this->definition['field_name'];
     $field = field_info_field($field_name);
-    $value = isset($values->{$this->real_field}) ? $values->{$this->real_field} : $this->options['empty'];
+    $value = isset($values->{$this->field_alias}) ? $values->{$this->field_alias} : $this->options['empty'];
 
     $items[] = array('value' => $value);
     $instances = field_info_instances('sparql_views_resource', $this->definition['bundle']);

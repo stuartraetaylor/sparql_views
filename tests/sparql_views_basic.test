@@ -18,10 +18,7 @@ class SparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
   }
 
   protected function setUp() {
-    parent::setUp('sparql_views', 'sparql_registry', 'views', 'views_ui', 'sparql_views_test');
-
-    $web_user = $this->drupalCreateUser(array('administer sparql_views types',));
-    $this->drupalLogin($web_user);
+    parent::setUp();
   }
 
   public function testFieldQuery() {
@@ -35,6 +32,48 @@ class SparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
 
     // Test that the query pulled foaf:name from the endpoint.
     $this->assertTrue($view->result[0]->{$this->field_1}, t('The query returned values for foaf:name.'));
+  }
+
+  public function testRelationshipQuery() {
+    $view = $this->getBasicView();
+    $endpoint = sparql_views_get_endpoint($this->endpoint['uri']);
+
+    $select_clause = "/SELECT DISTINCT \?{$this->main_resource} \?{$this->field_1} \?{$this->rel_1} \?{$this->rel_1_field_1}/";
+    $where_clause = "/WHERE {\n\?{$this->main_resource} foaf:name \?{$this->field_1}; foaf:made \?{$this->rel_1}.\n\?{$this->rel_1} rdfs:label \?{$this->rel_1_field_1}/";
+
+    $view->display['default']->handler->override_option('relationships', array(
+      'rel 1' => array(
+        'id' => $this->rel_1,
+        'table' => $endpoint->table_id,
+        'field' => $this->rel_1,
+        'relationship' => 'none',
+      ),
+    ));
+
+    $existing_fields = $view->display['default']->handler->get_option('fields');
+    $new_fields = array(
+      'rel 1' => array(
+        'id' => $this->rel_1,
+        'table' => $endpoint->table_id,
+        'field' => $this->rel_1,
+        'relationship' => 'none',
+      ),
+      'rel_1_field_1' => array(
+        'id' => $this->rel_1_field_1,
+        'table' => $endpoint->table_id,
+        'field' => $this->rel_1_field_1,
+        'relationship' => $this->rel_1,
+      ),
+    );
+    $view->display['default']->handler->override_option('fields', array_merge($existing_fields, $new_fields));
+
+    // Execute the view.
+    $view->execute();
+
+    $query = $view->build_info['query'];
+
+    // Test that the query result brings back all 4 fields.
+    $this->assertTrue((preg_match($select_clause, $query) == TRUE && preg_match($where_clause, $query) == TRUE), t('Relationship handler produces valid query.'));
   }
 
 }

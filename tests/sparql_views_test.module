@@ -14,16 +14,29 @@ function sparql_views_test_views_api() {
  */
 function sparql_views_test_rdf_mapping() {
   $return = array(
-    'sparql_views_test_person' =>array(
+    array(
       'type' => 'sparql_views_resource',
       'bundle' => 'sparql_views_test_person',
       'mapping' => array(
         'rdftype' => array('foaf:Person'),
-        'sparql_views_test_person_name' => array(
+        'sparql_views_test_name' => array(
           'predicates' => array('foaf:name'),
         ),
         'sparql_views_test_person_image' => array(
           'predicates' => array('foaf:img'),
+        ),
+        'sparql_views_test_paper' => array(
+          'predicates' => array('foaf:made'),
+        ),
+      ),
+    ),
+    array(
+      'type' => 'sparql_views_resource',
+      'bundle' => 'sparql_views_test_paper',
+      'mapping' => array(
+        //'rdftype' => array('foaf:Person'),
+        'sparql_views_test_name' => array(
+          'predicates' => array('rdfs:label'),
         ),
       ),
     ),

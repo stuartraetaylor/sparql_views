@@ -44,22 +44,22 @@ function sparql_views_test_formatters() {
   $handler->display->display_options['fields']['sparql_views_test_person']['field'] = 'sparql_views_test_person';
 
   // Text field.
-  $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_person_name']['id'] = 'sparql_views_test_person_sparql_views_test_person_name';
-  $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_person_name']['table'] = TABLE_ID;
-  $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_person_name']['field'] = 'sparql_views_test_person_sparql_views_test_person_name';
+  $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_name']['id'] = 'sparql_views_test_person_sparql_views_test_name';
+  $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_name']['table'] = TABLE_ID;
+  $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_name']['field'] = 'sparql_views_test_person_sparql_views_test_name';
 
   // Image field.
   $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_person_image']['id'] = 'sparql_views_test_person_sparql_views_test_person_image';
   $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_person_image']['table'] = TABLE_ID;
   $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_person_image']['field'] = 'sparql_views_test_person_sparql_views_test_person_image';
   
-  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_person_name']['id'] = 'sparql_views_test_person_sparql_views_test_person_name';
-  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_person_name']['table'] = TABLE_ID;
-  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_person_name']['field'] = 'sparql_views_test_person_sparql_views_test_person_name';
-  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_person_name']['value'] = 'Lin Clark';
-  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_person_name']['group'] = 0;
-  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_person_name']['expose']['operator'] = FALSE;
-  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_person_name']['sparql_options'] = array(
+  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_name']['id'] = 'sparql_views_test_person_sparql_views_test_name';
+  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_name']['table'] = TABLE_ID;
+  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_name']['field'] = 'sparql_views_test_person_sparql_views_test_name';
+  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_name']['value'] = 'Lin Clark';
+  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_name']['group'] = 0;
+  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_name']['expose']['operator'] = FALSE;
+  $handler->display->display_options['filters']['sparql_views_test_person_sparql_views_test_name']['sparql_options'] = array(
     'value_type' => 'string',
     'language' => '0',
   );

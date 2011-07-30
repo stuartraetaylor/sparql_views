@@ -4,6 +4,7 @@ package = SPARQL Views
 core = 7.x
 dependencies[] = views
 dependencies[] = sparql_views
+dependencies[] = sparql_views_related_resource
 files[] = sparql_views_test.views_default.inc
 hidden = TRUE
 

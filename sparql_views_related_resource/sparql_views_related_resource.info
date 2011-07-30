@@ -1,0 +1,5 @@
+name = Related Resource
+description = Defines a field type for referencing one SPARQL Views resource type from another.
+package = Views
+core = 7.x
+dependencies[] = field

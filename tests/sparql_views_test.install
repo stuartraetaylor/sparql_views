@@ -57,7 +57,7 @@ function _sparql_views_test_create_resource_type() {
   // Save the endpoints and get an array of endpoint ids.
   $endpoint_ids = sparql_views_register_endpoints($endpoints);
 
-  // Define the SPARQL Views resource type.
+  // Define the SPARQL Views resource type - Person.
   $sparql_views_test_person = array(
     'name' => 'sparql_views_test_person',
     'label' => $t('Person (SV test)'),
@@ -69,7 +69,20 @@ function _sparql_views_test_create_resource_type() {
     ),
   );
 
+  // Define the SPARQL Views resource type - Paper.
+  $sparql_views_test_paper = array(
+    'name' => 'sparql_views_test_paper',
+    'label' => $t('Paper (SV test)'),
+    'base' => 'sparql_views_resource',
+    'description' => $t('This is a paper as modeled in the ISWC2010 dataset.'),
+    // For each endpoint where this resource can be used, select that endpoint.
+    'endpoints' => array(
+      $endpoint_ids['ISWC2010'] => TRUE,
+    ),
+  );
+
   sparql_views_resource_type_save((object) $sparql_views_test_person);
+  sparql_views_resource_type_save((object) $sparql_views_test_paper);
 }
 
 /**
@@ -81,12 +94,16 @@ function _sparql_views_test_installed_fields() {
 
   $return = array(
     array(
-      'field_name' => 'sparql_views_test_person_name',
+      'field_name' => 'sparql_views_test_name',
       'type'        => 'text',
     ),
     array(
       'field_name' => 'sparql_views_test_person_image',
       'type'        => 'image',
+    ),
+    array(
+      'field_name' => 'sparql_views_test_paper',
+      'type'        => 'sparql_views_related_resource',
     ),
   );
 
@@ -100,16 +117,30 @@ function _sparql_views_test_installed_instances() {
   $t = get_t();
   $instances = array();
 
-  // Add the fields to the resource type (Country).
+  // Add the fields to the resource type (Person).
   $instances['sparql_views_test_person'] = array(
     array(
-      'field_name'  => 'sparql_views_test_person_name',
+      'field_name'  => 'sparql_views_test_name',
       'label'       => $t('Name'),
       'entity_type' => 'sparql_views_resource',
     ),
     array(
       'field_name'  => 'sparql_views_test_person_image',
       'label'       => $t('Image'),
+      'entity_type' => 'sparql_views_resource',
+    ),
+    array(
+      'field_name'  => 'sparql_views_test_paper',
+      'label'       => $t('Authored Paper'),
+      'entity_type' => 'sparql_views_resource',
+    ),
+  );
+
+  // Add the fields to the resource type (Paper).
+  $instances['sparql_views_test_paper'] = array(
+    array(
+      'field_name'  => 'sparql_views_test_name',
+      'label'       => $t('Name'),
       'entity_type' => 'sparql_views_resource',
     ),
   );
