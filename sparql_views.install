@@ -8,6 +8,25 @@
  * Implementation of hook_schema().
  */
 function sparql_views_schema() {
+  // Defines schema fields required for exportable entities.
+  $entity_exportable_schema_fields = array(
+    'status' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      // Set the default to ENTITY_CUSTOM without using the constant as it is
+      // not safe to use it at this point.
+      'default' => 0x01,
+      'size' => 'tiny',
+      'description' => 'The exportable status of the entity.',
+    ),
+    'module' => array(
+      'description' => 'The name of the providing module if the entity has been defined in code.',
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    ),
+  );
+
   $schema['sparql_views_resource_type'] = array(
     'description' => 'Storage for user-defined sparql_views_resource types.',
     'fields' => array(
@@ -32,7 +51,7 @@ function sparql_views_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
-    ) + entity_exportable_schema_fields(),
+    ) + $entity_exportable_schema_fields,
     'primary key' => array('id'),
     'unique keys' => array(
       'name' => array('name'),
@@ -72,10 +91,6 @@ function sparql_views_schema() {
         'table' => 'sparql_views_resource_type',
         'columns' => array('name' => 'name'),
       ),
-      'owner' => array(
-        'table' => 'users',
-        'columns' => array('uid' => 'uid'),
-      ),
     ),
     'primary key' => array('svid'),
   );
@@ -111,4 +126,25 @@ function sparql_views_schema() {
     ),
   );
   return $schema;
+}
+
+/**
+ * Change endpoint identifier from SRID to endpoint URI in sparql_views_resource_type_endpoint database table.
+ */
+function sparql_views_update_7205() {
+  $result = db_query("SELECT * FROM {sparql_views_resource_type_endpoint}");
+
+  db_drop_table('sparql_views_resource_type_endpoint');
+  foreach ($result as $record) {
+    dpm($record->svid);
+  }
+  $schema = array(
+    'description' => 'The URI of the endpoint that this resource is found in.',
+    'type' => 'varchar',
+    // IE8's max length.
+    'length' => 2083,
+    'not null' => TRUE,
+    'default' => '',
+  );
+  db_change_field('sparql_views', 'srid', 'endpoint_uri', $schema);
 }
