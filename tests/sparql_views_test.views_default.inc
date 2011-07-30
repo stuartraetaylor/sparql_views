@@ -4,7 +4,7 @@
  *   Test views
  */
 
-define('TABLE_ID', 'sparql_views_' . crc32('localhost/arc2/ISWC2010/sparql.php'));
+define('TABLE_ID', 'sparql_views_' . crc32('localhost/arc2/sparql_views_test/sparql.php'));
 
 /**
  * Implements hook_views_default_views().
@@ -48,6 +48,11 @@ function sparql_views_test_formatters() {
   $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_name']['table'] = TABLE_ID;
   $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_name']['field'] = 'sparql_views_test_person_sparql_views_test_name';
 
+  // Number field.
+  $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_age']['id'] = 'sparql_views_test_person_sparql_views_test_age';
+  $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_age']['table'] = TABLE_ID;
+  $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_age']['field'] = 'sparql_views_test_person_sparql_views_test_age';
+
   // Image field.
   $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_person_image']['id'] = 'sparql_views_test_person_sparql_views_test_person_image';
   $handler->display->display_options['fields']['sparql_views_test_person_sparql_views_test_person_image']['table'] = TABLE_ID;
@@ -73,5 +78,5 @@ function sparql_views_test_formatters() {
 }
 
 function sparql_views_test_table_id() {
-  return 'sparql_views_' . crc32('localhost/arc2/ISWC2010/sparql.php');
+  return 'sparql_views_' . crc32('localhost/arc2/sparql_views_test/sparql.php');
 }

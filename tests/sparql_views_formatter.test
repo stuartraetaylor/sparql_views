@@ -30,6 +30,9 @@ class SparqlViewsFormatterTest extends SparqlViewsQueryTest {
     // Text fields should display properly. If not, something is completely
     // borked.
     $this->assertRaw('<span class="field-content">Lin Clark</span>', t('Text field formatter works.'));
+  
+    // Number field.
+    $this->assertRaw('<span class="field-content">11,101</span>', t('Number field formatter works'));
 
     // Image field.
     $img = $this->xpath('//img[contains(@src, "http://lin-clark.com/sites/default/files/linclark-front.jpg")]');

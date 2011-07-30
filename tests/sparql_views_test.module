@@ -22,6 +22,9 @@ function sparql_views_test_rdf_mapping() {
         'sparql_views_test_name' => array(
           'predicates' => array('foaf:name'),
         ),
+        'sparql_views_test_age' => array(
+          'predicates' => array('foaf:age'),
+        ),
         'sparql_views_test_person_image' => array(
           'predicates' => array('foaf:img'),
         ),
