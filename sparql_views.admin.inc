@@ -51,11 +51,11 @@ function sparql_views_resource_type_form($form, &$form_state, $resource_type, $o
 
   field_attach_form('sparql_views_resource_type', $resource_type, $form, $form_state);
 
-  $selected_endpoints = db_query("SELECT srid FROM {sparql_views_resource_type_endpoint} WHERE svid = :svid", array(':svid' => $resource_type->id))->fetchCol();
+  $selected_endpoints = db_query("SELECT endpoint_uri FROM {sparql_views_resource_type_endpoint} WHERE svid = :svid", array(':svid' => $resource_type->id))->fetchCol();
   $endpoints = sparql_registry_load_multiple();
   $options = array();
   foreach ($endpoints as $endpoint) {
-    $options[$endpoint->srid] = $endpoint->title . ': <span class="description">' . $endpoint->uri . '</span>';
+    $options[$endpoint->uri] = $endpoint->title . ': <span class="description">' . $endpoint->uri . '</span>';
   }
   $form['endpoints'] = array(
     '#title' => t('Endpoints this resource can be found in'),

@@ -39,7 +39,7 @@ function sparql_views_views_data_alter(&$data) {
   foreach (sparql_views_get_endpoints() as $endpoint) {
     $select = db_select('sparql_views_resource_type', 'svrt')
       ->fields('svrt', array('name'));
-    $select->join('sparql_views_resource_type_endpoint', 'e', 'svrt.id = e.svid AND e.srid = :endpoint', array(':endpoint' => $endpoint->srid));
+    $select->join('sparql_views_resource_type_endpoint', 'e', 'svrt.id = e.svid AND e.endpoint_uri = :endpoint', array(':endpoint' => $endpoint->uri));
     $bundles = $select->execute()->fetchCol();
     foreach($bundles as $bundle_type) {
       $rdf_mapping = $entity_info['bundles'][$bundle_type]['rdf_mapping'];

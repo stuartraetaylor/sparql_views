@@ -95,7 +95,34 @@ function sparql_views_schema() {
     'primary key' => array('svid'),
   );
 
-  $schema['sparql_views_resource_type_endpoint'] = array(
+  $schema['sparql_views_resource_type_endpoint'] = _sparql_views_schema_7200();
+
+  return $schema;
+}
+
+/**
+ * Change endpoint identifier from SRID to endpoint URI in sparql_views_resource_type_endpoint database table.
+ */
+function sparql_views_update_7211() {
+  $result = db_query("SELECT * FROM {sparql_views_resource_type_endpoint}");
+
+  db_drop_table('sparql_views_resource_type_endpoint');
+
+  db_create_table('sparql_views_resource_type_endpoint', _sparql_views_schema_7200());
+  foreach ($result as $record) {
+    $svid = $record->svid;
+    $endpoint = sparql_registry_load($record->srid);
+    $db_insert = db_insert('sparql_views_resource_type_endpoint')
+      ->fields(array(
+        'svid' => $svid,
+        'endpoint_uri' => $endpoint->uri,
+      ))
+      ->execute();
+  }
+}
+
+function _sparql_views_schema_7200() {
+  $schema = array(
     'description' => 'Defines which resource types can be used with which endpoints.',
     'fields' => array(
       'svid' => array(
@@ -104,11 +131,13 @@ function sparql_views_schema() {
         'not null' => TRUE,
         'unsigned' => TRUE,
       ),
-      'srid' => array(
-        'description' => 'The SRID of the endpoint.',
-        'type' => 'int',
+      'endpoint_uri' => array(
+        'description' => 'The URI of the endpoint that this resource is found in.',
+        'type' => 'varchar',
+        // IE8's max length.
+        'length' => 2083,
         'not null' => TRUE,
-        'unsigned' => TRUE,
+        'default' => '',
       ),
     ),
     'foreign keys' => array(
@@ -116,35 +145,12 @@ function sparql_views_schema() {
         'table' => 'sparql_views_resource_type',
         'columns' => array('svid' => 'svid'),
       ),
-      'srid' => array(
+      'endpoint_uri' => array(
         'table' => 'sparql_registry',
-        'columns' => array('srid' => 'srid'),
+        'columns' => array('endpoint_uri' => 'uri'),
       ),
     ),
-    'unique keys' => array(
-      'relation' => array('svid', 'srid'),
-    ),
   );
+
   return $schema;
-}
-
-/**
- * Change endpoint identifier from SRID to endpoint URI in sparql_views_resource_type_endpoint database table.
- */
-function sparql_views_update_7205() {
-  $result = db_query("SELECT * FROM {sparql_views_resource_type_endpoint}");
-
-  db_drop_table('sparql_views_resource_type_endpoint');
-  foreach ($result as $record) {
-    dpm($record->svid);
-  }
-  $schema = array(
-    'description' => 'The URI of the endpoint that this resource is found in.',
-    'type' => 'varchar',
-    // IE8's max length.
-    'length' => 2083,
-    'not null' => TRUE,
-    'default' => '',
-  );
-  db_change_field('sparql_views', 'srid', 'endpoint_uri', $schema);
 }

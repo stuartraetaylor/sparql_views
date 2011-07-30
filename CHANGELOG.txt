@@ -7,6 +7,7 @@ http://drupal.org/node/817148/commits
 
 SPARQL Views 7.x-2.x-dev
 ------------------------
+- #1234558: Use endpoint_uri instead of srid to connect resource types to endpoints.
 - #1120682: Ensure that relation handling is predictable and robust.
 
 SPARQL Views 7.x-2.x-alpha4

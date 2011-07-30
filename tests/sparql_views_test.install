@@ -55,7 +55,7 @@ function _sparql_views_test_create_resource_type() {
     'uri' => 'http://localhost/arc2/ISWC2010/sparql.php',
   );
   // Save the endpoints and get an array of endpoint ids.
-  $endpoint_ids = sparql_views_register_endpoints($endpoints);
+  sparql_views_register_endpoints($endpoints);
 
   // Define the SPARQL Views resource type - Person.
   $sparql_views_test_person = array(
@@ -65,7 +65,7 @@ function _sparql_views_test_create_resource_type() {
     'description' => $t('This is a person as modeled in the ISWC2010 dataset.'),
     // For each endpoint where this resource can be used, select that endpoint.
     'endpoints' => array(
-      $endpoint_ids['ISWC2010'] => TRUE,
+      $endpoints['ISWC2010']->uri => TRUE,
     ),
   );
 
@@ -77,7 +77,7 @@ function _sparql_views_test_create_resource_type() {
     'description' => $t('This is a paper as modeled in the ISWC2010 dataset.'),
     // For each endpoint where this resource can be used, select that endpoint.
     'endpoints' => array(
-      $endpoint_ids['ISWC2010'] => TRUE,
+      $endpoints['ISWC2010']->uri => TRUE,
     ),
   );
 

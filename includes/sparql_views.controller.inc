@@ -28,10 +28,10 @@ class SparqlViewsController extends EntityAPIControllerExportable implements Ent
       $entity_id = db_query("SELECT id FROM {sparql_views_resource_type} WHERE name = :name", array(':name' => $entity->name))->fetch();
       $svid = $entity_id->id;
       $delete = db_delete('sparql_views_resource_type_endpoint')->condition('svid', $svid)->execute();
-      $insert = db_insert('sparql_views_resource_type_endpoint')->fields(array('svid', 'srid'));
-      foreach ($entity->endpoints as $srid => $selected) {
+      $insert = db_insert('sparql_views_resource_type_endpoint')->fields(array('svid', 'endpoint_uri'));
+      foreach ($entity->endpoints as $endpoint_uri => $selected) {
         if ($selected) {
-          $insert->values(array('svid' => $svid, 'srid' => $srid));
+          $insert->values(array('svid' => $svid, 'endpoint_uri' => $endpoint_uri));
         }
       }
       $insert->execute();
