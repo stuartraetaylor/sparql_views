@@ -4,6 +4,11 @@
  */
 class sparql_views_plugin_query_sparql extends views_plugin_query {
   /**
+   * Namespaces that are used in this query.
+   */
+  var $required_namespaces = array();
+
+  /**
    * An array of fields which have been specified for selection. Fields may be
    * included in the triple patterns (i.e. in filters or for path traversal)
    * without being selected for retrieval.
@@ -116,7 +121,6 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     $ns = rdf_get_namespaces();
     $bindings = array();
     $prefixes = '';
-    $mynamespaces = array();
 
     // Create the SELECT clause.
     $select = 'SELECT';
@@ -143,20 +147,24 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
       $statements = array();
       $triple_pattern .= isset($this->replacements[$s]) ? $this->replacements[$s]['replacement_formatted'] : "?$s";
       foreach($pattern['pred_obj'] as $pred_obj) {
-        $p = isset($this->replacements[$pred_obj['p']]) ? $this->replacements[$pred_obj['p']]['replacement_formatted'] : $pred_obj['p'];
+        $p = isset($this->replacements[$pred_obj['p']]) ? $this->replacements[$pred_obj['p']]['replacement_formatted'] : $this->validate_curie($pred_obj['p']);
+
+        // If there is a preset value for the object, use the formatted version
+        // of it. Otherwise, use the field_alias as a variable.
         $o = isset($this->replacements[$pred_obj['o']]) ? $this->replacements[$pred_obj['o']]['replacement_formatted'] : '?' . $pred_obj['o'];
+
+        // If this field is optional, wrap it in an OPTIONAL clause.
         if ($pred_obj['#optional'] == TRUE) {
           $optionals .= "OPTIONAL {?$s $p $o}\n";
         }
         else {
           $statements[] = " $p $o";
         }
-        $mynamespaces[] = _sparql_views_predicate_ns($p); 
       }
       $triple_pattern .= implode(';', $statements) . ".\n";
     }
-    $mynamespaces = array_unique($mynamespaces);
-    foreach($mynamespaces as $prefix) {
+    $required_namespaces = array_unique($this->required_namespaces);
+    foreach($required_namespaces as $prefix) {
       if (isset($ns[$prefix])) {
         $namespace = $ns[$prefix];
         $prefixes .= "PREFIX $prefix: <$namespace>\n";
@@ -276,7 +284,7 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
   function add_replacement($field_name, $replacement, $value_type, $language = NULL) {
     switch($value_type){
       case 'uri':
-        $replacement_formatted = "<$replacement>";
+        $replacement_formatted = preg_match('/^http/', $replacement) ? "<$replacement>" : $this->validate_curie($replacement);
         break;
       case 'string':
         $replacement_formatted = '"' . $replacement . '"';
@@ -334,6 +342,19 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
       }
     }
     return $results;
+  }
+
+  function validate_curie($curie) {
+    // If this starts with http, it isn't a CURIE.
+    if (preg_match('/^http/', $curie)) {
+      return $curie;
+    }
+
+    $split = explode(':', $curie);
+    if(count($split) == 2) {
+      $this->required_namespaces[] = $split[0];
+    }
+    return $curie; 
   }
 }
 

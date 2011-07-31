@@ -414,13 +414,6 @@ function sparql_views_entity_update($entity, $type) {
   }
 }
 
-function _sparql_views_predicate_ns($predicate) {
-  $split = explode(':', $predicate);
-  if(count($split) == 2)
-    return $split[0];
-  return FALSE; 
-}
-
 function _sparql_views_get_variable_value_types() {
   return array(
     'uri' => 'URI',
