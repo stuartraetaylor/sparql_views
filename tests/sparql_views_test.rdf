@@ -42,6 +42,24 @@
     <foaf:img rdf:resource="http://lin-clark.com/sites/default/files/linclark-front.jpg"/>
     <foaf:age>11101</foaf:age>
   </rdf:Description>
+  <!-- Authored Paper -->
+  <rdf:Description rdf:about="http://data.semanticweb.org/conference/iswc/2010/paper/518">
+    <foaf:maker rdf:resource="http://data.semanticweb.org/person/lin-clark"/>
+    <swc:authorList rdf:resource="http://data.semanticweb.org/conference/iswc/2010/paper/518/authorlist"/>
+    <swrc:url rdf:resource="http://iswc2010.semanticweb.org/pdf/518.pdf"/>
+    <dc:creator rdf:resource="http://data.semanticweb.org/person/lin-clark"/>
+    <dc:subject>End-user Programming</dc:subject>
+    <dc:subject>User Interfaces</dc:subject>
+    <dc:subject>CMS</dc:subject>
+    <rdfs:label>SPARQL Views: A Visual SPARQL Query Builder for Drupal</rdfs:label>
+    <swrc:author rdf:resource="http://data.semanticweb.org/person/lin-clark"/>
+    <swrc:month>November</swrc:month>
+    <swc:isPartOf rdf:resource="http://data.semanticweb.org/conference/iswc/2010/poster-demo-proceedings"/>
+    <swrc:abstract>Publishing Linked Data on the Web has become much easier with tools such as Drupal. However, consuming that data and presenting it in a meaningful way is still difficult for both Web developers and for Semantic Web practitioners. We demonstrate a module for Drupal which supports visual query building for SPARQL queries and enables meaningful displays of the query result.</swrc:abstract>
+    <rdf:type rdf:resource="http://swrc.ontoware.org/ontology#InProceedings"/>
+    <dc:title>SPARQL Views: A Visual SPARQL Query Builder for Drupal</dc:title>
+    <swrc:year>2010</swrc:year>
+  </rdf:Description>
 
   <!-- 10 people for basic query testing -->
   <rdf:Description rdf:about="http://data.semanticweb.org/person/michael-hausenblas">

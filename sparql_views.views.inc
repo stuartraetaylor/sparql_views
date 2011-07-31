@@ -92,7 +92,7 @@ function sparql_views_views_data_alter(&$data) {
           'group' => t($group),
           'base' => $endpoint->table_id,
           'base field' => $bundle_type,
-          'handler' => 'sparql_views_handler_filter_field_value',
+          'handler' => 'sparql_views_handler_filter_rdftype',
           'label' => t($bundle_type),
           'rdf_type' => isset($rdf_mapping['rdftype']) ? $rdf_mapping['rdftype'] : NULL,
         ),

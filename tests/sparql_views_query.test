@@ -8,6 +8,7 @@ abstract class SparqlViewsQueryTest extends ViewsTestCase {
 
   // Field names.
   var $main_resource = 'sparql_views_test_person';
+  var $main_resource_rdftype = 'sparql_views_test_person_type';
   var $field_1 = 'sparql_views_test_person_sparql_views_test_name';
   var $rel_1 = 'sparql_views_test_person_sparql_views_test_paper';
   var $rel_1_field_1 = 'sparql_views_test_paper_sparql_views_test_name';

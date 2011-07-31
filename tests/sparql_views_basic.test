@@ -34,6 +34,52 @@ class SparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
     $this->assertTrue($view->result[0]->{$this->field_1}, t('The query returned values for foaf:name.'));
   }
 
+  public function testRdfTypeFilterQuery() {
+    $view = $this->getBasicView();
+    $endpoint = sparql_views_get_endpoint($this->endpoint['uri']);
+
+    $expected_clause = '/\; rdf:type foaf:Person./';
+
+    $rdftype_filter = array(
+      'rdftype' => array(
+        'operator' => '=',
+        'value' => 'foaf:Person',
+        'group' => '0',
+        'exposed' => FALSE,
+        'expose' => array(
+          'operator' => FALSE,
+          'label' => '',
+        ),
+        'id' => $this->main_resource_rdftype,
+        'table' => $endpoint->table_id,
+        'field' => $this->main_resource_rdftype,
+        'relationship' => 'none',
+      ),
+    );
+
+    $view->display['default']->handler->override_option('filters', $rdftype_filter);
+
+    // Won't have to add the field once #1104074 is fixed.
+    $existing_fields = $view->display['default']->handler->get_option('fields');
+    $new_fields = array(
+      'rdftype' => array(
+        'id' => $this->main_resource_rdftype,
+        'table' => $endpoint->table_id,
+        'field' => $this->main_resource_rdftype,
+        'relationship' => 'none',
+      ),
+    );
+    $view->display['default']->handler->override_option('fields', array_merge($existing_fields, $new_fields));
+
+    // Execute the view.
+    $view->execute();
+
+    $query = $view->build_info['query'];
+
+    // Test that the query is built properly.
+    $this->assertTrue((preg_match($expected_clause, $query) == TRUE), t('RDF type filter adds type restriction.'));
+  }
+
   public function testRelationshipQuery() {
     $view = $this->getBasicView();
     $endpoint = sparql_views_get_endpoint($this->endpoint['uri']);
@@ -52,6 +98,7 @@ class SparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
 
     $existing_fields = $view->display['default']->handler->get_option('fields');
     $new_fields = array(
+      // Won't have to add the field once #1104074 is fixed.
       'rel 1' => array(
         'id' => $this->rel_1,
         'table' => $endpoint->table_id,
@@ -72,7 +119,7 @@ class SparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
 
     $query = $view->build_info['query'];
 
-    // Test that the query result brings back all 4 fields.
+    // Test that the query is built properly.
     $this->assertTrue((preg_match($select_clause, $query) == TRUE && preg_match($where_clause, $query) == TRUE), t('Relationship handler produces valid query.'));
   }
 

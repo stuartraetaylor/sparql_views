@@ -37,7 +37,7 @@ function sparql_views_test_rdf_mapping() {
       'type' => 'sparql_views_resource',
       'bundle' => 'sparql_views_test_paper',
       'mapping' => array(
-        //'rdftype' => array('foaf:Person'),
+        'rdftype' => array('http://swrc.ontoware.org/ontology#InProceedings'),
         'sparql_views_test_name' => array(
           'predicates' => array('rdfs:label'),
         ),

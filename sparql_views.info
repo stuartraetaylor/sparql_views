@@ -18,6 +18,7 @@ files[] = handlers/sparql_views_handler_sort.inc
 files[] = handlers/sparql_views_handler_relationship.inc
 files[] = handlers/sparql_views_handler_filter_field_value.inc
 files[] = handlers/sparql_views_handler_filter_language.inc
+files[] = handlers/sparql_views_handler_filter_rdftype.inc
 files[] = plugins/sparql_views_plugin_query_sparql.inc
 files[] = plugins/sparql_views_plugin_argument_default_field.inc
 files[] = tests/sparql_views.test
