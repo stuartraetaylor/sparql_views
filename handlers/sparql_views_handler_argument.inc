@@ -64,11 +64,22 @@ class sparql_views_handler_argument extends views_handler_argument {
     ob_end_clean();
 
     $replacement = !empty($return) ? $return : $this->argument;
+    $relationship = $this->options['relationship'];
+
+    if ($relationship == 'none') {
+      $subject = $this->definition['subject'];
+    }
+    else {
+      $subject = $relationship;
+    }
+    $predicate = $this->definition['rdf_mapping'][0];
 
     if (!empty($replacement)) {
       $value_type = $this->options['sparql_options']['value_type'];
       $language = $this->options['sparql_options']['language'];
-      $this->query->add_replacement($this->options['field'], $replacement, $value_type, $language);
+
+      $object = $this->query->format_replacement($replacement, $value_type, $language);
+      $this->query->add_triple($subject, $predicate, $object);
     }
   }
 }

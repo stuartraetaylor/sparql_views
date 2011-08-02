@@ -31,14 +31,14 @@ class SparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
     $this->assertEqual(10, count($view->result), t('The number of returned rows match.'));
 
     // Test that the query pulled foaf:name from the endpoint.
-    $this->assertTrue($view->result[0]->{$this->field_1}, t('The query returned values for foaf:name.'));
+    $this->assertTrue($view->result[0]->{$this->field_name}, t('The query returned values for foaf:name.'));
   }
 
-  public function testRdfTypeFilterQuery() {
+  public function testFilterRdfTypeQuery() {
     $view = $this->getBasicView();
     $endpoint = sparql_views_get_endpoint($this->endpoint['uri']);
 
-    $expected_clause = '/\; rdf:type foaf:Person./';
+    $expected_clause = "/{$this->main_resource} rdf:type foaf:Person\;/";
 
     $rdftype_filter = array(
       'rdftype' => array(
@@ -59,18 +59,6 @@ class SparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
 
     $view->display['default']->handler->override_option('filters', $rdftype_filter);
 
-    // Won't have to add the field once #1104074 is fixed.
-    $existing_fields = $view->display['default']->handler->get_option('fields');
-    $new_fields = array(
-      'rdftype' => array(
-        'id' => $this->main_resource_rdftype,
-        'table' => $endpoint->table_id,
-        'field' => $this->main_resource_rdftype,
-        'relationship' => 'none',
-      ),
-    );
-    $view->display['default']->handler->override_option('fields', array_merge($existing_fields, $new_fields));
-
     // Execute the view.
     $view->execute();
 
@@ -80,15 +68,54 @@ class SparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
     $this->assertTrue((preg_match($expected_clause, $query) == TRUE), t('RDF type filter adds type restriction.'));
   }
 
+  public function testFilterLanguageQuery() {
+    $view = $this->getBasicView();
+    $endpoint = sparql_views_get_endpoint($this->endpoint['uri']);
+
+    $existing_fields = $view->display['default']->handler->get_option('fields');
+    $new_fields = array(
+      'field_affiliation' => array(
+        'id' => $this->field_affiliation,
+        'table' => $endpoint->table_id,
+        'field' => $this->field_affiliation,
+        'relationship' => 'none',
+      ),
+    );
+    $view->display['default']->handler->override_option('fields', array_merge($existing_fields, $new_fields));
+
+    $lang_filter = array(
+      'language' => array(
+        'operator' => '=',
+        'value' => 'ie',
+        'group' => '0',
+        'exposed' => FALSE,
+        'expose' => array(
+          'operator' => FALSE,
+          'label' => '',
+        ),
+        'id' => $this->field_affiliation . '_language',
+        'table' => $endpoint->table_id,
+        'field' => $this->field_affiliation . '_language',
+        'relationship' => 'none',
+      ),
+    );
+
+    $view->display['default']->handler->override_option('filters', $lang_filter);
+
+    // Execute the view.
+    $view->execute();
+
+    $query = $view->build_info['query'];
+
+    // Test that the query is built properly.
+    $this->assertTrue(count($view->result) == 1 && preg_match('/Gaillimh/', $view->result[0]->{$this->field_affiliation}), t('Filter (language) query returns correct result.'));  }
+
   public function testRelationshipQuery() {
     $view = $this->getBasicView();
     $endpoint = sparql_views_get_endpoint($this->endpoint['uri']);
 
-    $select_clause = "/SELECT DISTINCT \?{$this->main_resource} \?{$this->field_1} \?{$this->rel_1} \?{$this->rel_1_field_1}/";
-    $where_clause = "/WHERE {\n\?{$this->main_resource} foaf:name \?{$this->field_1}; foaf:made \?{$this->rel_1}.\n\?{$this->rel_1} rdfs:label \?{$this->rel_1_field_1}/";
-
     $view->display['default']->handler->override_option('relationships', array(
-      'rel 1' => array(
+      $this->rel_1 => array(
         'id' => $this->rel_1,
         'table' => $endpoint->table_id,
         'field' => $this->rel_1,
@@ -98,17 +125,10 @@ class SparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
 
     $existing_fields = $view->display['default']->handler->get_option('fields');
     $new_fields = array(
-      // Won't have to add the field once #1104074 is fixed.
-      'rel 1' => array(
-        'id' => $this->rel_1,
+      $this->rel_1_field_name => array(
+        'id' => $this->rel_1_field_name,
         'table' => $endpoint->table_id,
-        'field' => $this->rel_1,
-        'relationship' => 'none',
-      ),
-      'rel_1_field_1' => array(
-        'id' => $this->rel_1_field_1,
-        'table' => $endpoint->table_id,
-        'field' => $this->rel_1_field_1,
+        'field' => $this->rel_1_field_name,
         'relationship' => $this->rel_1,
       ),
     );
@@ -117,10 +137,121 @@ class SparqlViewsBasicQueryTest extends SparqlViewsQueryTest {
     // Execute the view.
     $view->execute();
 
-    $query = $view->build_info['query'];
-
-    // Test that the query is built properly.
-    $this->assertTrue((preg_match($select_clause, $query) == TRUE && preg_match($where_clause, $query) == TRUE), t('Relationship handler produces valid query.'));
+    // Test that the right result was returned.
+    $this->assertTrue($view->result[0]->{$this->rel_1_field_name} === 'SPARQL Views: A Visual SPARQL Query Builder for Drupal', t('Relationship query returns correct result.'));
   }
 
+  /**
+   * Test whether the name field can be retrieved from two people, related
+   * resources of the same type. This can pose a problem because the query
+   * could potentially end up looking for two related people with the same
+   * name.
+   */
+  public function testRelationshipDuplicatedFieldQuery() {
+    $view = $this->getBasicView();
+    $endpoint = sparql_views_get_endpoint($this->endpoint['uri']);
+
+    $view->display['default']->handler->override_option('relationships', array(
+      $this->rel_knows => array(
+        'id' => $this->rel_knows,
+        'table' => $endpoint->table_id,
+        'field' => $this->rel_knows,
+        'relationship' => 'none',
+      ),
+    ));
+
+    $existing_fields = $view->display['default']->handler->get_option('fields');
+    $new_fields = array(
+      'field_name' => array(
+        'id' => $this->field_name,
+        'table' => $endpoint->table_id,
+        'field' => $this->field_name,
+        'relationship' => $this->rel_knows,
+      ),
+    );
+    $view->display['default']->handler->override_option('fields', array_merge($existing_fields, $new_fields));
+
+    // Execute the view.
+    $view->execute();
+
+    // Test that the right result was returned. Add _1 to the end of the field
+    // name because that is how it would be aliased.
+    $this->assertTrue(count($view->result) == 3 && $view->result[0]->{$this->field_name . '_1'} === 'Vinny Reynolds', t('Relationship query using same field on related resource returns correct result.'));
+  }
+
+  /**
+   * Test simple argument.
+   */
+  public function testSimpleArgument() {
+    $view = $this->getBasicView();
+    $endpoint = sparql_views_get_endpoint($this->endpoint['uri']);
+
+    // Add a argument.
+    $view->display['default']->handler->override_option('arguments', array(
+      $this->field_name => array(
+        'default_action' => 'ignore',
+        'id' => $this->field_name,
+        'table' => $endpoint->table_id,
+        'field' => $this->field_name,
+        'relationship' => 'none',
+        'sparql_options' => array(
+          'value_type' => 'string',
+          'language' => '0',
+          'code' => '',
+        ),
+      )
+    ));
+
+    $saved_view = clone $view;
+
+    // Execute with a view
+    $view->set_arguments(array('Lin Clark'));
+    $view->execute();
+
+    $this->assertTrue(count($view->result) == 1 && $view->result[0]->{$this->main_resource} === 'http://data.semanticweb.org/person/lin-clark', t('Argument query returns correct result.'));
+  }
+
+  /**
+   * Test complex relationship + argument.
+   */
+  public function testRelationshipArgument() {
+    $view = $this->getBasicView();
+    $endpoint = sparql_views_get_endpoint($this->endpoint['uri']);
+
+    // Add extra field.
+    $existing_fields = $view->display['default']->handler->get_option('fields');
+    $new_fields = array(
+      // Won't have to add the field once #1104074 is fixed.
+      'rel 1' => array(
+        'id' => $this->rel_1,
+        'table' => $endpoint->table_id,
+        'field' => $this->rel_1,
+        'relationship' => 'none',
+      ),
+    );
+    $view->display['default']->handler->override_option('fields', array_merge($existing_fields, $new_fields));
+    // Add a argument.
+    $view->display['default']->handler->override_option('arguments', array(
+      $this->field_name => array(
+        'default_action' => 'ignore',
+        'id' => $this->rel_1_field_name,
+        'table' => $endpoint->table_id,
+        'field' => $this->rel_1_field_name,
+        'relationship' => $this->rel_1,
+        'sparql_options' => array(
+          'value_type' => 'string',
+          'language' => '0',
+          'code' => '',
+        ),
+      )
+    ));
+
+    $saved_view = clone $view;
+
+    // Execute with a view
+    $view->set_arguments(array('SPARQL Views: A Visual SPARQL Query Builder for Drupal'));
+    $view->execute();
+
+    $this->assertTrue(count($view->result) == 1 && $view->result[0]->{$this->rel_1} === 'http://data.semanticweb.org/conference/iswc/2010/paper/518', t('Argument/relationship query returns correct result.'));
+  }
 }

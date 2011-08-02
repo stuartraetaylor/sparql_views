@@ -95,6 +95,7 @@ function sparql_views_views_data_alter(&$data) {
           'handler' => 'sparql_views_handler_filter_rdftype',
           'label' => t($bundle_type),
           'rdf_type' => isset($rdf_mapping['rdftype']) ? $rdf_mapping['rdftype'] : NULL,
+          'subject' => $bundle_type,
         ),
         'argument' => array(
           'help' => t('Replace part of the query'),
@@ -104,6 +105,7 @@ function sparql_views_views_data_alter(&$data) {
           'handler' => 'sparql_views_handler_argument',
           'label' => t($bundle_type),
           'rdf_type' => isset($rdf_mapping['rdftype']) ? $rdf_mapping['rdftype'] : NULL,
+          'subject' => $bundle_type,
         ),
       );
 
@@ -138,6 +140,8 @@ function sparql_views_views_data_alter(&$data) {
             'base field' => $field_name,
             'handler' => 'sparql_views_handler_filter_field_value',
             'label' => t($field_label),
+            'rdf_mapping' => $field['predicates'],
+            'subject' => $bundle_type,
           ),
           'argument' => array(
             'help' => t('Replace part of the query'),
@@ -146,6 +150,8 @@ function sparql_views_views_data_alter(&$data) {
             'base field' => $field_name,
             'handler' => 'sparql_views_handler_argument',
             'label' => t($field_label),
+            'rdf_mapping' => $field['predicates'],
+            'subject' => $bundle_type,
           ),
           'sort' => array(
             'help' => t('Order the results of the query. This can make your query very slow and will time out on some endpoints, such as DBpedia.'),
@@ -161,6 +167,8 @@ function sparql_views_views_data_alter(&$data) {
             'base field' => $field_name,
             'handler' => 'sparql_views_handler_relationship',
             'label' => t($field_label),
+            'rdf_mapping' => $field['predicates'],
+            'subject' => $bundle_type,
           );
         }
 
@@ -173,6 +181,8 @@ function sparql_views_views_data_alter(&$data) {
             'base field' => $bundle_type.'_'.$field_name,
             'handler' => 'sparql_views_handler_filter_language',
             'label' => t('Language'),
+            'rdf_mapping' => $field['predicates'],
+            'subject' => $bundle_type,
           );
       }
       $data[$endpoint->table_id] = array_merge($data[$endpoint->table_id], $new_fields);

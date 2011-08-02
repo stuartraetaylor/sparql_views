@@ -144,7 +144,7 @@ class sparql_views_handler_field extends views_handler_field {
       $subject = $relationship;
     }
     $predicate = $this->definition['rdf_mapping'][0];
-    $this->field_alias = $this->query->add_field($subject, $predicate, $object, array('#optional' => $optional));
+    $this->field_alias = $this->query->add_triple($subject, $predicate, '?' . $object, array('#select' => TRUE, '#optional' => $optional));
   }
 
   function click_sort($order) {

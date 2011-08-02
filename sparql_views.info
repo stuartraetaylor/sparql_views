@@ -16,6 +16,7 @@ files[] = handlers/sparql_views_handler_field_rdftype.inc
 files[] = handlers/sparql_views_handler_field_subject.inc
 files[] = handlers/sparql_views_handler_sort.inc
 files[] = handlers/sparql_views_handler_relationship.inc
+files[] = handlers/sparql_views_handler_filter.inc
 files[] = handlers/sparql_views_handler_filter_field_value.inc
 files[] = handlers/sparql_views_handler_filter_language.inc
 files[] = handlers/sparql_views_handler_filter_rdftype.inc

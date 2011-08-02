@@ -109,6 +109,14 @@ function _sparql_views_test_installed_fields() {
       'field_name' => 'sparql_views_test_paper',
       'type'        => 'sparql_views_related_resource',
     ),
+    array(
+      'field_name' => 'sparql_views_test_knows',
+      'type'        => 'sparql_views_related_resource',
+    ),
+    array(
+      'field_name' => 'sparql_views_test_affiliation',
+      'type'        => 'text',
+    ),
   );
 
   return $return;
@@ -141,6 +149,16 @@ function _sparql_views_test_installed_instances() {
     array(
       'field_name'  => 'sparql_views_test_paper',
       'label'       => $t('Authored Paper'),
+      'entity_type' => 'sparql_views_resource',
+    ),
+    array(
+      'field_name'  => 'sparql_views_test_knows',
+      'label'       => $t('Knows'),
+      'entity_type' => 'sparql_views_resource',
+    ),
+    array(
+      'field_name'  => 'sparql_views_test_affiliation',
+      'label'       => $t('Employer'),
       'entity_type' => 'sparql_views_resource',
     ),
   );

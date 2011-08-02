@@ -5,7 +5,7 @@
  * the query.
  */
 
-class sparql_views_handler_filter_language extends views_handler_filter_string{
+class sparql_views_handler_filter_language extends sparql_views_handler_filter{
 
   function option_definition() {
     $options = parent::option_definition();

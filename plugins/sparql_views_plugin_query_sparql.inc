@@ -151,7 +151,7 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
 
         // If there is a preset value for the object, use the formatted version
         // of it. Otherwise, use the field_alias as a variable.
-        $o = isset($this->replacements[$pred_obj['o']]) ? $this->replacements[$pred_obj['o']]['replacement_formatted'] : '?' . $pred_obj['o'];
+        $o = isset($this->replacements[$pred_obj['o']]) ? $this->replacements[$pred_obj['o']]['replacement_formatted'] : $pred_obj['o'];
 
         // If this field is optional, wrap it in an OPTIONAL clause.
         if ($pred_obj['#optional'] == TRUE) {
@@ -163,6 +163,8 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
       }
       $triple_pattern .= implode(';', $statements) . ".\n";
     }
+
+    // Get namespaces.
     $required_namespaces = array_unique($this->required_namespaces);
     foreach($required_namespaces as $prefix) {
       if (isset($ns[$prefix])) {
@@ -262,41 +264,29 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     $view->pager['current_page'] = 0;
   }
 
-  function add_field($subject, $predicate, $object, $options = array()) {
+  function add_triple($subject, $predicate, $object, $options = array()) {
     $i = 1;
     $alias = $object;
 
     $defaults = array(
+      '#select' => FALSE,
       '#optional' => FALSE,
     );
 
     $options = array_merge($defaults, $options);
-    while (in_array($alias, $this->select_fields)) {
+    while (in_array(preg_replace('/^\?/', '', $alias), $this->select_fields)) {
       $alias = $object . '_' . $i;
       $i++;
     }
-    $this->select_fields[] = $alias;
-    $this->triples[$subject]['pred_obj'][] = array_merge(array('p' => $predicate, 'o' => $alias), $options);
+
+    $o = $alias;
+    if ($options['#select'] == TRUE) {
+      $alias = preg_replace('/^\?/', '', $alias);
+      $this->select_fields[] = $alias;
+    }
+    $this->triples[$subject]['pred_obj'][] = array_merge(array('p' => $predicate, 'o' => $o), $options);
 
     return $alias;
-  }
-
-  function add_replacement($field_name, $replacement, $value_type, $language = NULL) {
-    switch($value_type){
-      case 'uri':
-        $replacement_formatted = preg_match('/^http/', $replacement) ? "<$replacement>" : $this->validate_curie($replacement);
-        break;
-      case 'string':
-        $replacement_formatted = '"' . $replacement . '"';
-        if (!empty($language)) {
-          $replacement_formatted .= "@$language";
-        }
-        break;
-    }
-    $this->replacements[$field_name] = array(
-      'replacement_formatted' => $replacement_formatted,
-      'replacement_raw' => $replacement
-    );
   }
 
   function add_filter($function, $params) {
@@ -355,6 +345,21 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
       $this->required_namespaces[] = $split[0];
     }
     return $curie; 
+  }
+
+  function format_replacement($replacement, $value_type, $language = NULL) {
+    switch($value_type){
+      case 'uri':
+        $replacement_formatted = preg_match('/^http/', $replacement) ? "<$replacement>" : $this->validate_curie($replacement);
+        break;
+      case 'string':
+        $replacement_formatted = '"' . $replacement . '"';
+        if (!empty($language)) {
+          $replacement_formatted .= "@$language";
+        }
+        break;
+    }
+    return $replacement_formatted;
   }
 }
 

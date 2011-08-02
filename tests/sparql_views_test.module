@@ -31,6 +31,12 @@ function sparql_views_test_rdf_mapping() {
         'sparql_views_test_paper' => array(
           'predicates' => array('foaf:made'),
         ),
+        'sparql_views_test_knows' => array(
+          'predicates' => array('foaf:knows'),
+        ),
+        'sparql_views_test_affiliation' => array(
+          'predicates' => array('swc:affiliation'),
+        ),
       ),
     ),
     array(
@@ -46,4 +52,13 @@ function sparql_views_test_rdf_mapping() {
   );
 
   return $return;
+}
+
+/**
+ * Implements hook_rdf_namespaces().
+ */
+function sparql_views_test_rdf_namespaces() {
+  return array(
+    'swc' => 'http://data.semanticweb.org/ns/swc/ontology#',
+  );
 }

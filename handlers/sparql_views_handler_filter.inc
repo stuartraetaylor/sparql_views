@@ -5,7 +5,19 @@
  * the query.
  */
 
-class sparql_views_handler_filter_rdftype extends sparql_views_handler_filter{  
+class sparql_views_handler_filter extends views_handler_filter_string{
+  // We will use the value type and language form elements for getting
+  // necessary info about replacements that this filter makes.
+  var $selected_sparql_options = array('value_type', 'language');
+
+  function option_definition() {
+    $options = parent::option_definition();
+    // Attach the SPARQL specific options.
+    $options = _sparql_views_attach_form_options($options, $this->selected_sparql_options);
+
+    return $options;
+  }
+  
   /**
    * This kind of construct makes it relatively easy for a child class
    * to add or remove functionality by overriding this function and
@@ -26,6 +38,7 @@ class sparql_views_handler_filter_rdftype extends sparql_views_handler_filter{
   function admin_summary() {
     $output = $this->operator . ' ';
     $output .= check_plain($this->options['value']);
+    $output .= "<i>({$this->options['sparql_options']['value_type']})</i>";
     return $output;
   }
   
@@ -51,15 +64,11 @@ class sparql_views_handler_filter_rdftype extends sparql_views_handler_filter{
     }
 
     if ($which == 'all' || $which == 'value') {
-      $value = $this->value;
-      if (empty($this->value) && count($this->definition['rdf_type']) > 0) {
-        $value = reset($this->definition['rdf_type']);
-      }
       $form['value'] = array(
         '#type' => 'textfield',
         '#title' => t('Value'),
         '#size' => 60,
-        '#default_value' => $value,
+        '#default_value' => $this->value,
       );
       if (!empty($form_state['exposed']) && !isset($form_state['input'][$identifier])) {
         $form_state['input'][$identifier] = $this->value;
@@ -80,18 +89,21 @@ class sparql_views_handler_filter_rdftype extends sparql_views_handler_filter{
         '#value' => NULL
       );
     }
+    // Attach the SPARQL specific form elements.
+    $form = _sparql_views_attach_form_elements($form, $this->options, $this->selected_sparql_options);
   }
 
   function query() {
-    $field_name = $this->real_field;
     $info = $this->operators();
     if (!empty($info[$this->operator]['method'])) {
-      $this->{$info[$this->operator]['method']}($field_name);
+      $this->{$info[$this->operator]['method']}();
     }
   }
   
-  function op_equal($field_name) {
-    $object = $this->query->format_replacement($this->options['value'], 'uri');
+  function op_equal() {
+    $value_type = $this->options['sparql_options']['value_type'];
+    $language = $this->options['sparql_options']['language'];
+    $object = $this->query->format_replacement($this->options['value'], $value_type, $language);
     $relationship = $this->options['relationship'];
 
     if ($relationship == 'none') {
@@ -100,9 +112,7 @@ class sparql_views_handler_filter_rdftype extends sparql_views_handler_filter{
     else {
       $subject = $relationship;
     }
-
-    // All RDF types have predicate rdf:type.
-    $predicate = 'rdf:type';
+    $predicate = $this->definition['rdf_mapping'][0];
     $this->query->add_triple($subject, $predicate, $object);
   }
 }

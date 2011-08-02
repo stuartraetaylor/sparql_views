@@ -40,8 +40,14 @@
 
     <!-- Image for formatter testing -->
     <foaf:img rdf:resource="http://lin-clark.com/sites/default/files/linclark-front.jpg"/>
+    <!-- Number for formatter testing -->
     <foaf:age>11101</foaf:age>
+    <!-- Language for filter testing -->
+    <swc:affiliation xml:lang="ie">Ollscoil na hÉireann, Gaillimh</swc:affiliation>
+    <!-- Person for foaf:knows -->
+    <foaf:knows rdf:resource="http://data.semanticweb.org/person/vinny-reynolds"/>
   </rdf:Description>
+
   <!-- Authored Paper -->
   <rdf:Description rdf:about="http://data.semanticweb.org/conference/iswc/2010/paper/518">
     <foaf:maker rdf:resource="http://data.semanticweb.org/person/lin-clark"/>

@@ -5,7 +5,7 @@
  * the query.
  */
 
-class sparql_views_handler_filter_field_value extends views_handler_filter_string{
+class sparql_views_handler_filter_field_value extends sparql_views_handler_filter{
   // We will use the value type and language form elements for getting
   // necessary info about replacements that this filter makes.
   var $selected_sparql_options = array('value_type', 'language');
@@ -91,20 +91,5 @@ class sparql_views_handler_filter_field_value extends views_handler_filter_strin
     }
     // Attach the SPARQL specific form elements.
     $form = _sparql_views_attach_form_elements($form, $this->options, $this->selected_sparql_options);
-  }
-
-  function query() {
-    $field_name = $this->real_field;
-    $info = $this->operators();
-    if (!empty($info[$this->operator]['method'])) {
-      $this->{$info[$this->operator]['method']}($field_name);
-    }
-  }
-  
-  function op_equal($field_name) {
-    $replacement = $this->options['value'];
-    $value_type = $this->options['sparql_options']['value_type'];
-    $language = $this->options['sparql_options']['language'];
-    $this->query->add_replacement($field_name, $replacement, $value_type, $language);
   }
 }

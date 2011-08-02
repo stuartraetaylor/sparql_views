@@ -9,9 +9,11 @@ abstract class SparqlViewsQueryTest extends ViewsTestCase {
   // Field names.
   var $main_resource = 'sparql_views_test_person';
   var $main_resource_rdftype = 'sparql_views_test_person_type';
-  var $field_1 = 'sparql_views_test_person_sparql_views_test_name';
+  var $field_name = 'sparql_views_test_person_sparql_views_test_name';
+  var $field_affiliation = 'sparql_views_test_person_sparql_views_test_affiliation';
   var $rel_1 = 'sparql_views_test_person_sparql_views_test_paper';
-  var $rel_1_field_1 = 'sparql_views_test_paper_sparql_views_test_name';
+  var $rel_1_field_name = 'sparql_views_test_paper_sparql_views_test_name';
+  var $rel_knows = 'sparql_views_test_person_sparql_views_test_knows';
 
   protected function setUp() {
     parent::setUp('sparql_views', 'sparql_registry', 'views', 'views_ui', 'sparql_views_test');
@@ -48,9 +50,9 @@ abstract class SparqlViewsQueryTest extends ViewsTestCase {
         'relationship' => 'none',
       ),
       'field 1' => array(
-        'id' => $this->field_1,
+        'id' => $this->field_name,
         'table' => $endpoint->table_id,
-        'field' => $this->field_1,
+        'field' => $this->field_name,
         'relationship' => 'none',
       ),
     ));
