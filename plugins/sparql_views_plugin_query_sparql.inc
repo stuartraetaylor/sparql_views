@@ -290,8 +290,14 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
   }
 
   function add_filter($function, $params) {
-    $params = implode(', ',$params);
-    $this->filters[] = "$function($params)";
+    $operators = array('=', '<', '>');
+    if (in_array($function, $operators)) {
+      $this->filters[] = "({$params[0]} $function {$params[1]})";
+    }
+    else {
+      $params = implode(', ',$params);
+      $this->filters[] = "$function($params)";
+    }
   }
 
   function add_orderby($field_name, $order) {

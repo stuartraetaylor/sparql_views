@@ -103,7 +103,14 @@ class sparql_views_handler_filter extends views_handler_filter_string{
   function op_equal() {
     $value_type = $this->options['sparql_options']['value_type'];
     $language = $this->options['sparql_options']['language'];
-    $object = $this->query->format_replacement($this->value, $value_type, $language);
+    if ($value_type != 'number') {
+      $object = $this->query->format_replacement($this->value, $value_type, $language);
+    }
+    else {
+      $var = '?var' . rand();
+      $this->query->add_filter('=', array($var, $replacement));
+      $object = $var;
+    }
     $relationship = $this->options['relationship'];
 
     if ($relationship == 'none') {
