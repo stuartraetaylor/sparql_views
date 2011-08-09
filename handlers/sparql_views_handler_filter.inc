@@ -108,7 +108,7 @@ class sparql_views_handler_filter extends views_handler_filter_string{
     }
     else {
       $var = '?var' . rand();
-      $this->query->add_filter('=', array($var, $replacement));
+      $this->query->add_filter('=', array($var, $this->value));
       $object = $var;
     }
     $relationship = $this->options['relationship'];
