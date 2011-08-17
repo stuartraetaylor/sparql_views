@@ -105,6 +105,7 @@ function sparql_views_views_data_alter(&$data) {
           'handler' => 'sparql_views_handler_argument',
           'label' => t($bundle_type),
           'rdf_type' => isset($rdf_mapping['rdftype']) ? $rdf_mapping['rdftype'] : NULL,
+          'rdf_mapping' => array('rdf:type'),
           'subject' => $bundle_type,
         ),
       );
