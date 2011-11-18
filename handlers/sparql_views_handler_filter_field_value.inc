@@ -90,6 +90,8 @@ class sparql_views_handler_filter_field_value extends sparql_views_handler_filte
       );
     }
     // Attach the SPARQL specific form elements.
-    $form = _sparql_views_attach_form_elements($form, $this->options, $this->selected_sparql_options);
+    if (empty($form_state['exposed'])) {
+      $form = _sparql_views_attach_form_elements($form, $this->options, $this->selected_sparql_options);
+    }
   }
 }
