@@ -31,8 +31,34 @@ class sparql_views_handler_filter_field_value extends sparql_views_handler_filte
         'method' => 'op_equal',
         'values' => 1,
       ),
+      '~=' => array(
+        'title' => t('Contains'),
+        'short' => t('~='),
+        'method' => 'op_contains',
+        'values' => 1,
+      ),
     );
     return $operators;
+  }
+
+  function op_contains() {
+    $value_type = $this->options['sparql_options']['value_type'];
+    $language = $this->options['sparql_options']['language'];
+
+    $var = '?var' . rand();
+    $this->query->add_filter('regex', array($var, "'$this->value'", "'i'"));
+    $object = $var;
+
+    $relationship = $this->options['relationship'];
+
+    if ($relationship == 'none') {
+      $subject = $this->definition['subject'];
+    }
+    else {
+      $subject = $relationship;
+    }
+    $predicate = $this->definition['rdf_mapping'][0];
+    $this->query->add_triple($subject, $predicate, $object);
   }
 
   function admin_summary() {
