@@ -65,12 +65,22 @@ class sparql_views_handler_field extends views_handler_field {
     $options['settings'] = array(
       'default' => array(),
     );
+    $options['alter']['contains']['url_encode'] = array(
+      'default' => FALSE,
+    );
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
+
+    $form['alter']['url_encode'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('URL Encode'),
+      '#description' => t('Apply the PHP urlencode function to this field.'),
+      '#default_value' => $this->options['alter']['url_encode'],
+    );
 
     // If this is not a Field API field, there are no formatting options.
     // @todo Should non-field API fields just not have this handler as a parent?
@@ -196,6 +206,16 @@ class sparql_views_handler_field extends views_handler_field {
    */
   function pre_render(&$values) {
     // @todo Combine subjects.
+  }
+
+  function render_text($alter) {
+    $value = parent::render_text($alter);
+
+    if (!empty($alter['url_encode'])) {
+      $value = urlencode($value);
+    }
+
+    return $value;
   }
 
   function render($values) {
