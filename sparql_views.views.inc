@@ -49,6 +49,7 @@ function sparql_views_views_data_alter(&$data) {
       // Attach handlers for the subject URI.
       $new_fields[$bundle_type] = array(
         'title' => t('URI'),
+        'help' => t('Field: field-name', array('field-name' => $bundle_type)),
         'group' => t($group),
         'field' => array(
           'handler' => 'sparql_views_handler_field_subject',
@@ -75,6 +76,7 @@ function sparql_views_views_data_alter(&$data) {
       // Attach handlers for the subject RDF type.
       $new_fields[$bundle_type . '_type'] = array(
         'title' => t('RDF type'),
+        'help' => t('Field: %field-name', array('field-name' => $bundle_type . '_type')),
         'group' => t($group),
         'field' => array(
           'handler' => 'sparql_views_handler_field_rdftype',
@@ -124,7 +126,8 @@ function sparql_views_views_data_alter(&$data) {
 
         $new_field = array(
           'title' => t($field_label),
-          'help' => t('RDF mapping: %rdf-mapping', array('%rdf-mapping' => implode(', ', $field['predicates']))),
+          'help' => t('RDF mapping: %rdf-mapping<br/>Field: %field-name',
+            array('%rdf-mapping' => implode(', ', $field['predicates']), '%field-name' => $instance_info['bundle'].'_'.$instance_info['field_name'])),
           'group' => t($group),
           'field' => array(
             'handler' => 'sparql_views_handler_field',
