@@ -187,7 +187,7 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
         $orderby .= " $order(?$field)\n";
       }
     }
-    $limit = isset($this->limit) ? "LIMIT $this->limit" : 'LIMIT 10';
+    $limit = isset($this->limit) ? "LIMIT $this->limit" : '';
     
     $query = $prefixes;
     $query .= $select . "\n";
