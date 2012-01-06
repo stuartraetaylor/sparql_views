@@ -26,6 +26,7 @@ class sparql_views_handler_field_subject extends sparql_views_handler_field {
     else {
       $subject = $relationship;
     }
+    $this->field_alias = $subject;
     return $subject;
   }
 }
