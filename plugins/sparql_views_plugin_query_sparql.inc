@@ -320,21 +320,32 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
 
     // Get all the rows that share the same subject
     foreach ($views_result as $key => $value) {
-      foreach ($subjects as $subject) {
-        $row_subjects[$key][$subject] = $value->{$subject};
+      foreach ($subjects as $sub_key => $subject) {
+        // If the URI is included as a field, use it to consolidate. Otherwise
+        // consolidate on the subject that comes directly before.
+        if (isset($value->{$subject})) {
+          $row_key = $subject;
+          $row_subjects[$key][$subject] = $value->{$subject};
+        }
+        else {
+          $row_key = $subjects[$sub_key - 1];
+        }
         foreach ($triples[$subject]['pred_obj'] as $pred_obj) {
-          $field = $pred_obj['o'];
+          $field = substr($pred_obj['o'], 1);
           if (in_array($field, $properties)) {
-            $subject_uris[$subject][$value->{$subject}][$field][$value->{$field}] = $value->{$field};
+            $subject_uris[$row_key][$value->{$row_key}][$field][$value->{$field}] = $value->{$field};
           }
         }
       }
     }
     $rows = _sparql_views_super_unique($row_subjects);
+    // The row key will be the first occurance of the subject.
     foreach ($rows as $key => $row) {
       foreach ($row as $subject_field_name => $subject) {
         $results[$key][$subject_field_name][] = $subject;
-        $results[$key] += $subject_uris[$subject_field_name][$subject];
+        if (is_array($subject_uris[$subject_field_name][$subject])) {
+          $results[$key] += $subject_uris[$subject_field_name][$subject];
+        }
       }
     }
     return $results;
