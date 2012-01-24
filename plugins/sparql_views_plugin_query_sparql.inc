@@ -153,11 +153,13 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
         // of it. Otherwise, use the field_alias as a variable.
         $o = isset($this->replacements[$pred_obj['o']]) ? $this->replacements[$pred_obj['o']]['replacement_formatted'] : $pred_obj['o'];
 
-        // If this field is optional, wrap it in an OPTIONAL clause.
-        if ($pred_obj['#optional'] == TRUE) {
+        if ($pred_obj['#exists'] == TRUE) {
+          // Exists is a special case of optional which binds the field to TRUE if a matching triple exists.
+          $optionals .= "OPTIONAL { BIND(true AS $o) EXISTS{ ?$s $p [] } }\n";
+        } else if ($pred_obj['#optional'] == TRUE) {
+          // If this field is optional, wrap it in an OPTIONAL clause.
           $optionals .= "OPTIONAL {?$s $p $o}\n";
-        }
-        else {
+        } else {
           $statements[] = " $p $o";
         }
       }
@@ -273,6 +275,7 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     $defaults = array(
       '#select' => FALSE,
       '#optional' => FALSE,
+      '#exists' => FALSE,
     );
 
     $options = array_merge($defaults, $options);

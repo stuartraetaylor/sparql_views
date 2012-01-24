@@ -62,6 +62,9 @@ class sparql_views_handler_field extends views_handler_field {
     $options['required'] = array(
       'default' => TRUE,
     );
+    $options['exists'] = array(
+      'default' => FALSE,
+    );
     $options['settings'] = array(
       'default' => array(),
     );
@@ -110,6 +113,16 @@ class sparql_views_handler_field extends views_handler_field {
       ),
     );
 
+    $form['exists'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Only check whether this field exists.'),
+      '#description' => t('This field is bound to TRUE if at least one corresponding RDF triple is found.'),
+      '#default_value' => $this->options['exists'],
+      '#ajax' => array(
+        'path' => views_ui_build_form_url($form_state),
+      ),
+    );
+
     // Get the currently selected formatter.
     if (isset($form_state['values']['options']['type'])) {
       $format = $form_state['values']['options']['type'];
@@ -148,7 +161,8 @@ class sparql_views_handler_field extends views_handler_field {
     $predicate = $this->definition['rdf_mapping'][0];
     $object = $this->real_field;
     $optional = empty($this->options['required']);
-    $this->field_alias = $this->query->add_triple($subject, $predicate, '?' . $object, array('#select' => TRUE, '#optional' => $optional));
+    $exists = !empty($this->options['exists']);
+    $this->field_alias = $this->query->add_triple($subject, $predicate, '?' . $object, array('#select' => TRUE, '#optional' => $optional, '#exists' => $exists));
   }
 
   function click_sort($order) {
