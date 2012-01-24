@@ -130,12 +130,17 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
       $select .= ' DISTINCT';
     }
 
-    // Add fields that the user has added to the Fields section in Views UI.
-    foreach ($this->select_fields as $key => $field) {
-      // Do not add variable to SELECT if it will be replaced with a value.
-      if (!isset($this->replacements[$field])) {
-        // Add a question mark before each variable.
-        $select .= " ?$field";
+    if ($get_count) {
+      $select .= " (COUNT(*) AS ?count)";
+    }
+    else {
+      // Add fields that the user has added to the Fields section in Views UI.
+      foreach ($this->select_fields as $key => $field) {
+        // Do not add variable to SELECT if it will be replaced with a value.
+        if (!isset($this->replacements[$field])) {
+          // Add a question mark before each variable.
+          $select .= " ?$field";
+        }
       }
     }
 
@@ -190,12 +195,16 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
       }
     }
     $limit = isset($this->limit) ? "LIMIT $this->limit" : '';
+    $offset = isset($this->offset) ? " OFFSET $this->offset" : '';
     
     $query = $prefixes;
     $query .= $select . "\n";
     $query .= "WHERE {\n$triple_pattern $optionals $filters} \n";
-    $query .= $orderby;
-    $query .= $limit;
+    if (!$get_count) {
+      $query .= $orderby;
+      $query .= $limit;
+      $query .= $offset;
+    }
     return $query;
   }
 
@@ -214,6 +223,7 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     $this->pager->query($view);
 
     $view->build_info['query'] = $this->query($view);
+    $view->build_info['count_query'] = $this->query($view, TRUE);
   }
 
   /**
@@ -263,9 +273,26 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     else {
       $view->result = $views_result;
     }
-    $view->total_rows = count($view->result);
+
+    // Execute count query for pager.
+    if ($this->pager->use_count_query() || !empty($view->get_total_rows)) {
+      $count_query = $view->build_info['count_query'];
+      $count_result = sparql_request($count_query, $endpoint);
+      $this->pager->total_items = $count_result['result']['rows'][0]['count'];
+
+      if (!empty($this->pager->options['offset'])) {
+        $this->pager->total_items -= $this->pager->options['offset'];
+      }
+      $this->pager->update_page_info();
+    }
+
+    if ($this->pager->use_pager()) {
+      $view->total_rows = $this->pager->get_total_items();
+    } else {
+      $view->total_rows = count($view->result);
+    }
+
     $view->execute_time = microtime(TRUE) - $start;
-    $view->pager['current_page'] = 0;
   }
 
   function add_triple($subject, $predicate, $object, $options = array()) {
