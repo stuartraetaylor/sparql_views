@@ -234,7 +234,7 @@ class sparql_views_handler_field extends views_handler_field {
 
   function render($values) {
     $output = '';
-    if (is_array($values)) {
+    if (is_array($values) && !empty($values[$this->field_alias])) {
       $items = array();
       foreach ($values[$this->field_alias] as $value) {
         $val = (object) array($this->field_alias => $value);
