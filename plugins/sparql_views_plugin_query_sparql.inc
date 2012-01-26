@@ -42,6 +42,11 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
   var $pager = NULL;
 
   /**
+   * An array of relationship fields.
+   */
+  var $relationships_fields = array();
+
+  /**
    * Constructor; Create the basic query object and fill with default values.
    */
   function init($base_table, $base_field, $options) {
@@ -114,8 +119,7 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
   *   Provide a countquery if this is true, otherwise provide a normal query.
   */
   function query($view, $get_count = FALSE) {
-    $triple_pattern = '';
-    $optionals = '';
+    $graph_pattern = '';
     $filters = '';
     $orderby = '';
     $ns = rdf_get_namespaces();
@@ -145,12 +149,14 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     }
 
     // Create the WHERE clause.
-    $where = '';
 
     // Form the triple pattern.
+    $subject_triples = array();
     foreach($this->triples as $s => $pattern) {
       $statements = array();
-      $triple_pattern .= isset($this->replacements[$s]) ? $this->replacements[$s]['replacement_formatted'] : "?$s";
+      $optionals = array();
+      $triples_block = isset($this->replacements[$s]) ? $this->replacements[$s]['replacement_formatted'] : "?$s";
+
       foreach($pattern['pred_obj'] as $pred_obj) {
         $p = isset($this->replacements[$pred_obj['p']]) ? $this->replacements[$pred_obj['p']]['replacement_formatted'] : $this->validate_curie($pred_obj['p']);
 
@@ -160,15 +166,32 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
 
         if ($pred_obj['#exists'] == TRUE) {
           // Exists is a special case of optional which binds the field to TRUE if a matching triple exists.
-          $optionals .= "OPTIONAL { BIND(true AS $o) EXISTS{ ?$s $p [] } }\n";
+          //$optionals .= "OPTIONAL { BIND(true AS $o) EXISTS{ ?$s $p [] } }\n";
+          $optionals[] = array('statement' => "BIND(true AS $o) EXISTS{ ?$s $p [] }", 'object' => NULL);
         } else if ($pred_obj['#optional'] == TRUE) {
           // If this field is optional, wrap it in an OPTIONAL clause.
-          $optionals .= "OPTIONAL {?$s $p $o}\n";
+          $optionals[] = array('statement' => "?$s $p $o", 'object' => preg_replace('/^\?/', '', $o));
         } else {
           $statements[] = " $p $o";
         }
       }
-      $triple_pattern .= implode(';', $statements) . ".\n";
+
+      // Form the graph pattern about the current subject.
+      $triples_block = empty($statements) ? '' : ($triples_block . implode(';', $statements) . '.');
+      $subject_graph_pattern = array('triples' => $triples_block, 'optionals' => $optionals);
+
+      // If this field forms a relationship, add the graph pattern its relationship parent.
+      if (!empty($this->relationship_fields[$s])) {
+        $relationship = $this->relationship_fields[$s];
+        $subject_triples[$relationship['parent']]['relationships'][$s] = $subject_graph_pattern;
+      } else {
+        $subject_triples[$s] = $subject_graph_pattern;
+      }
+    }
+
+    // Build the complete graph pattern.
+    foreach ($subject_triples as $s => $pattern_elements) {
+      $graph_pattern .= $this->build_graph_pattern($pattern_elements);
     }
 
     // Get namespaces.
@@ -180,8 +203,8 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
       }
     }
     // If no triples were added, run a generic ?s ?p ?o query.
-    if (empty($triple_pattern)) {
-      $triple_pattern = "?$field ?p ?o";
+    if (empty($graph_pattern)) {
+      $graph_pattern = "?$field ?p ?o";
     }
 
     foreach ($this->filters as $filter) {
@@ -199,13 +222,45 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     
     $query = $prefixes;
     $query .= $select . "\n";
-    $query .= "WHERE {\n$triple_pattern $optionals $filters} \n";
+    $query .= "WHERE {\n$graph_pattern$filters} \n";
     if (!$get_count) {
       $query .= $orderby;
       $query .= $limit;
       $query .= $offset;
     }
     return $query;
+  }
+
+  function build_graph_pattern($pattern_elements) {
+    $subject_pattern = '';
+    $relationship_pattern = '';
+    $optionals = '';
+
+    $subject_pattern .= $pattern_elements['triples'] . "\n";
+
+    // Build optionals and add any nested relationship triples.
+    foreach ($pattern_elements['optionals'] as $optional_block) {
+      $optionals .= 'OPTIONAL {';
+
+      if (!empty($pattern_elements['relationships'][$optional_block['object']])) {
+        $optionals .= "\n" . $optional_block['statement'] . '.';
+        $optionals .= "\n" . $this->build_graph_pattern($pattern_elements['relationships'][$optional_block['object']]);
+        unset($pattern_elements['relationships'][$optional_block['object']]);
+      } else {
+        $optionals .= $optional_block['statement'];
+      }
+
+      $optionals .= "}\n";
+    }
+
+    // Build remaining non-optional relationships.
+    if (!empty($pattern_elements['relationships'])) {
+      foreach ($pattern_elements['relationships'] as $relationship) {
+        $relationship_pattern .= $this->build_graph_pattern($relationship);
+      }
+    }
+
+    return $subject_pattern . $relationship_pattern . $optionals;
   }
 
   /**
@@ -318,6 +373,13 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     }
     $this->triples[$subject]['pred_obj'][] = array_merge(array('p' => $predicate, 'o' => $o), $options);
 
+    return $alias;
+  }
+
+  function add_relationship_triple($subject, $predicate, $object, $options = array()) {
+    $alias = $this->add_triple($subject, $predicate, $object, $options);
+    $field_alias = preg_replace('/^\?/', '', $alias);
+    $this->relationship_fields[$field_alias] = array('field' => $field_alias, 'parent' => $subject);
     return $alias;
   }
 

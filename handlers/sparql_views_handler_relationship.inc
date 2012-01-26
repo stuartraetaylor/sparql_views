@@ -24,6 +24,7 @@ class sparql_views_handler_relationship extends views_handler_relationship {
       $subject = $relationship;
     }
     $predicate = $this->definition['rdf_mapping'][0];
-    $this->field_alias = $this->query->add_triple($subject, $predicate, '?' . $object);
+    $optional = empty($this->options['required']);
+    $this->field_alias = $this->query->add_relationship_triple($subject, $predicate, '?' . $object, array('#optional' => $optional));
   }
 }
