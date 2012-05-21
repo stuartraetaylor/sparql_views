@@ -300,7 +300,7 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     if (empty($sparql_result) || empty($sparql_result['result']['rows'])) {
       $view->result = array();
       if (empty($view->display_handler->display->display_options['empty'])) {
-        vsm(t('No result returned. Please check your query and the endpoint status.'));
+        //vsm(t('No result returned. Please check your query and the endpoint status.'));
       }
       return;
     }
