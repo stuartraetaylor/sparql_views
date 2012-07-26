@@ -274,8 +274,9 @@ class sparql_views_handler_field extends views_handler_field {
     $value = isset($values->{$this->field_alias}) ? $values->{$this->field_alias} : $this->options['empty'];
 
     // FIXME format was missing here, submit bug report (ST).
-    $items[] = ($formatter == 'text_default') ? 
-        array('value' => $value, 'format' => $field['settings']['default_formatter']) :
+    $items[] = ($formatter == 'text_default' && !empty($field['settings']['format'])) ?
+        //array('value' => $value, 'format' => $field['settings']['default_formatter']) :
+        array('value' => $value, 'format' => $field['settings']['format']) :
         array('value' => $value);
     $instances = field_info_instances('sparql_views_resource', $this->definition['bundle']);
     $display['type'] = $formatter;
