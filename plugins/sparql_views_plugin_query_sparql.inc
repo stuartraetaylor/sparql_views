@@ -343,6 +343,7 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
 
     if ($this->pager->use_pager()) {
       $view->total_rows = $this->pager->get_total_items();
+      $this->pager->post_execute($view->result);
     } else {
       $view->total_rows = count($view->result);
     }
