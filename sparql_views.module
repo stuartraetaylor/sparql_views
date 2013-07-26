@@ -298,7 +298,7 @@ class SparqlViewsResource extends Entity {
    *
    * @see entity_view()
    */
-  public function view($view_mode = 'full', $langcode = NULL) {
+  public function view($view_mode = 'full', $langcode = NULL, $page = NULL) {
     $view =  parent::view($view_mode, $langcode);
 
     $key = !empty($this->is_new) ? 0 : $this->svid;
