@@ -100,7 +100,7 @@ class sparql_views_handler_filter extends views_handler_filter_string{
     }
   }
   
-  function op_equal() {
+  function op_equal($field) {
     $value_type = $this->options['sparql_options']['value_type'];
     $language = $this->options['sparql_options']['language'];
     if ($value_type != 'number') {

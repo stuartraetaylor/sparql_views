@@ -118,7 +118,7 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
   * @param $get_count
   *   Provide a countquery if this is true, otherwise provide a normal query.
   */
-  function query($view, $get_count = FALSE) {
+  function query($get_count = FALSE) {
     $graph_pattern = '';
     $filters = '';
     $orderby = '';

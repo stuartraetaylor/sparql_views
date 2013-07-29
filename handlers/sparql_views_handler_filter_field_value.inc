@@ -41,7 +41,7 @@ class sparql_views_handler_filter_field_value extends sparql_views_handler_filte
     return $operators;
   }
 
-  function op_contains() {
+  function op_contains($field) {
     $value_type = $this->options['sparql_options']['value_type'];
     $language = $this->options['sparql_options']['language'];
 

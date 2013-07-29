@@ -90,7 +90,7 @@ class sparql_views_handler_filter_rdftype extends sparql_views_handler_filter{
     }
   }
   
-  function op_equal($field_name) {
+  function op_equal($field) {
     // TODO submit patch. use plain value instead of full URI
     //   additionally, the value is in $this->value rather than $this->options
     // stu - 20120822
