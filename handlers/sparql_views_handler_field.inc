@@ -282,7 +282,8 @@ class sparql_views_handler_field extends views_handler_field {
     $display['type'] = $formatter;
     $display['settings'] = $this->options['settings'];
     $formatter_function = $field['module'] . '_field_formatter_view';
-    return render($formatter_function(NULL, NULL, NULL, $instances[$field_name], NULL, $items, $display));
+    $formatter_output = $formatter_function(NULL, NULL, NULL, $instances[$field_name], NULL, $items, $display);
+    return render($formatter_output);
   }
 
   function image($values) {

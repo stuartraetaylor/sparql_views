@@ -58,7 +58,7 @@ class sparql_views_handler_argument extends views_handler_argument {
    *
    * The argument sent may be found at $this->argument.
    */
-  function query($group_by) {
+  function query($group_by = FALSE) {
     ob_start();
     $return = eval($this->options['sparql_options']['code']);
     ob_end_clean();

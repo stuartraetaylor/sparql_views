@@ -277,8 +277,8 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     // Let the pager modify the query to add limits.
     $this->pager->query($view);
 
-    $view->build_info['query'] = $this->query($view);
-    $view->build_info['count_query'] = $this->query($view, TRUE);
+    $view->build_info['query'] = $this->query();
+    $view->build_info['count_query'] = $this->query(TRUE);
   }
 
   /**
