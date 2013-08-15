@@ -46,7 +46,8 @@ class sparql_views_handler_filter_field_value extends sparql_views_handler_filte
     $language = $this->options['sparql_options']['language'];
 
     $var = '?var' . rand();
-    $this->query->add_filter('regex', array($var, "'$this->value'", "'i'"));
+    $value = trim(addcslashes($this->value, "\'\"\r\n"));
+    $this->query->add_filter('regex', array($var, "'$value'", "'i'"));
     $object = $var;
 
     $relationship = $this->options['relationship'];
