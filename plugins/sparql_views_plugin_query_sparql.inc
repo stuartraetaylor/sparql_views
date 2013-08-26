@@ -47,6 +47,11 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
   var $relationships_fields = array();
 
   /**
+   * An array of full text searches.
+   */
+  var $text_search = array();
+
+  /**
    * Constructor; Create the basic query object and fill with default values.
    */
   function init($base_table, $base_field, $options) {
@@ -123,7 +128,6 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     $filters = '';
     $orderby = '';
     $ns = rdf_get_namespaces();
-    $bindings = array();
     $prefixes = '';
 
     // Create the SELECT clause.
@@ -202,6 +206,12 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
         $prefixes .= "PREFIX $prefix: <$namespace>\n";
       }
     }
+
+    // Add text search namespace.
+    if (!empty($this->text_search)) {
+      $prefixes .= "PREFIX text: <http://jena.apache.org/text#>\n";
+    }
+
     // If no triples were added, run a generic ?s ?p ?o query.
     if (empty($graph_pattern)) {
       $graph_pattern = "?$field ?p ?o";
@@ -228,6 +238,7 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
       $query .= $limit;
       $query .= $offset;
     }
+
     return $query;
   }
 
@@ -277,8 +288,30 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
     // Let the pager modify the query to add limits.
     $this->pager->query($view);
 
+    // Add full text search triple patterns.
+    $this->add_text_search_triples();
+
     $view->build_info['query'] = $this->query();
     $view->build_info['count_query'] = $this->query(TRUE);
+  }
+
+  function add_text_search_triples() {
+    // Build triple patterns once the pager has modified the query.
+    foreach ($this->text_search as $text_search) {
+      if ($text_search['limit'] == NULL && isset($this->limit)) {
+        $text_search['limit'] = $this->limit;
+      }
+
+      // Text search specification ([property] search-text [limit]).
+      $search_options = '';
+      $search_options .= '(';
+      $search_options .= ($text_search['property'] == NULL) ? '' : "{$text_search['property']} ";
+      $search_options .= "'{$text_search['value']}'";
+      $search_options .= ($text_search['limit'] == NULL) ? '' : " {$text_search['limit']}";
+      $search_options .= ')';
+      
+      $this->add_triple($text_search['resource'], 'text:query', $search_options, array('#text_search' => TRUE));
+    }
   }
 
   /**
@@ -359,6 +392,7 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
       '#select' => FALSE,
       '#optional' => FALSE,
       '#exists' => FALSE,
+      '#text_search' => FALSE,
     );
 
     $options = array_merge($defaults, $options);
@@ -372,7 +406,14 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
       $alias = preg_replace('/^\?/', '', $alias);
       $this->select_fields[] = $alias;
     }
-    $this->triples[$subject]['pred_obj'][] = array_merge(array('p' => $predicate, 'o' => $o), $options);
+    
+    $options = array_merge(array('p' => $predicate, 'o' => $o), $options);
+
+    if ($options['#text_search'] == TRUE) { // Add text searches to the beginning of the triples.
+      array_unshift($this->triples[$subject]['pred_obj'], $options);
+    } else {
+      $this->triples[$subject]['pred_obj'][] = $options;
+    }
 
     return $alias;
   }
@@ -404,6 +445,18 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
    */
   function set_limit($limit) {
     $this->limit = $limit;
+  }
+
+  /**
+   * Adds a full text search to the query (see jena-text).
+   */
+  function add_text_search($resource, $property, $value, $all_fields) {
+    $this->text_search[] = array(
+        'resource' => $resource,
+        'property' =>  $all_fields ? NULL : $property,
+        'value' => $value,
+        'limit' => NULL,
+    );
   }
 
   function consolidate_results($views_result) {

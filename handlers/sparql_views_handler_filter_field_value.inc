@@ -37,6 +37,12 @@ class sparql_views_handler_filter_field_value extends sparql_views_handler_filte
         'method' => 'op_contains',
         'values' => 1,
       ),
+      'search' => array(
+        'title' => t('Full text search (Jena/Fuseki only)'),
+        'short' => t('search'),
+        'method' => 'op_text_search',
+        'values' => 1,
+      ),
     );
     return $operators;
   }
@@ -60,6 +66,22 @@ class sparql_views_handler_filter_field_value extends sparql_views_handler_filte
     }
     $predicate = $this->definition['rdf_mapping'][0];
     $this->query->add_triple($subject, $predicate, $object);
+  }
+
+  function op_text_search($field = NULL) {
+    $all_fields = TRUE;
+    $relationship = $this->options['relationship'];
+
+    if ($relationship == 'none') {
+      $subject = $this->definition['subject'];
+    }
+    else {
+      $subject = $relationship;
+    }
+    $predicate = $this->definition['rdf_mapping'][0];
+
+    $value = trim(addcslashes($this->value, "\'\"\r\n"));
+    $this->query->add_text_search($subject, $predicate, $value, $all_fields);
   }
 
   function admin_summary() {
