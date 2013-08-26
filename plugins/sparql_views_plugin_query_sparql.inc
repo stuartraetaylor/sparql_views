@@ -307,7 +307,7 @@ class sparql_views_plugin_query_sparql extends views_plugin_query {
       $search_options .= '(';
       $search_options .= ($text_search['property'] == NULL) ? '' : "{$text_search['property']} ";
       $search_options .= "'{$text_search['value']}'";
-      $search_options .= ($text_search['limit'] == NULL) ? '' : " {$text_search['limit']}";
+      //$search_options .= ($text_search['limit'] == NULL) ? '' : " {$text_search['limit']}";
       $search_options .= ')';
       
       $this->add_triple($text_search['resource'], 'text:query', $search_options, array('#text_search' => TRUE));
